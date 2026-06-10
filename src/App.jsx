@@ -891,7 +891,9 @@ function App() {
 
   const renderWelcome = () => (
     <div className="h-full flex flex-col justify-center items-center p-8 bg-white text-center animate-fade-in relative z-10">
-      <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-4xl shadow-sm mb-8 border border-slate-100">🗺️</div>
+      <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center shadow-sm mb-8 border border-slate-100">
+        <Compass className="h-10 w-10 text-slate-700" strokeWidth={2.2} />
+      </div>
       <h1 className="text-3xl font-extrabold text-slate-800 mb-4 tracking-tight leading-tight">
         My Financial
         <br />
@@ -909,6 +911,7 @@ function App() {
           Takes about 3 minutes
         </p>
       </div>
+      <p className="text-[10px] text-slate-300 font-medium tracking-wide">v{__APP_VERSION__}</p>
     </div>
   );
 
