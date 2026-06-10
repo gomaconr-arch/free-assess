@@ -1,4 +1,6 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { ArrowRight, ClipboardCheck, Compass, ShieldCheck, Sparkles } from 'lucide-react';
 
 const Lottie = lazy(() => import('lottie-react'));
 
@@ -213,6 +215,113 @@ const Button = ({ children, onClick, variant = 'primary', disabled = false, clas
     </button>
   );
 };
+
+const QUICK_REVIEW_TRUST_CUES = [
+  { icon: ShieldCheck, label: 'Free' },
+  { icon: ClipboardCheck, label: 'Quick' },
+  { icon: Compass, label: 'Guided' }
+];
+
+const IntroIcon = () => (
+  <motion.div
+    initial={{ scale: 0.96, opacity: 0, y: 8 }}
+    animate={{ scale: 1, opacity: 1, y: 0 }}
+    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+    className="relative flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-slate-200 bg-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.16)]"
+  >
+    <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-br from-white/10 via-transparent to-emerald-400/10" />
+    <div className="absolute -right-2 -top-2 rounded-full border border-white/70 bg-white/95 p-1.5 shadow-sm">
+      <Sparkles className="h-3.5 w-3.5 text-slate-500" strokeWidth={2.4} />
+    </div>
+    <Compass className="relative z-10 h-9 w-9 text-white" strokeWidth={2.2} />
+  </motion.div>
+);
+
+const TrustCue = ({ icon: Icon, label }) => (
+  <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/90 px-3 py-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
+    <Icon className="h-4 w-4 text-slate-500" strokeWidth={2.2} />
+    <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</span>
+  </div>
+);
+
+const PrimaryActionButton = ({ children, onClick }) => (
+  <motion.button
+    type="button"
+    onClick={onClick}
+    whileHover={{ y: -1, scale: 1.01 }}
+    whileTap={{ scale: 0.985 }}
+    transition={{ duration: 0.2 }}
+    className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-slate-900 px-6 py-[1.125rem] text-base font-semibold text-white shadow-[0_18px_32px_rgba(15,23,42,0.2)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 hover:bg-slate-800"
+  >
+    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100 group-hover:animate-pulse-soft" aria-hidden="true" />
+    <span className="absolute inset-x-6 top-0 h-px bg-white/20" aria-hidden="true" />
+    <span>{children}</span>
+    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={2.4} />
+  </motion.button>
+);
+
+const SecondaryActionButton = ({ children, onClick }) => (
+  <motion.button
+    type="button"
+    onClick={onClick}
+    whileHover={{ y: -1 }}
+    whileTap={{ scale: 0.99 }}
+    transition={{ duration: 0.2 }}
+    className="w-full rounded-full px-4 py-3 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
+  >
+    {children}
+  </motion.button>
+);
+
+const QuickReviewIntroScreen = ({ onPrimary, onSecondary }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+    className="relative flex h-full w-full items-center justify-center overflow-hidden bg-slate-50 px-4 py-5 sm:px-6"
+  >
+    <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-slate-900/[0.04] to-transparent" />
+    <div className="absolute left-[-6rem] top-10 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+    <div className="absolute right-[-5rem] bottom-4 h-44 w-44 rounded-full bg-slate-900/5 blur-3xl" />
+
+    <motion.div
+      initial={{ opacity: 0, y: 18, scale: 0.985 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+      className="relative z-10 w-full max-w-[28rem] px-6 py-7 sm:px-8 sm:py-8"
+    >
+      <div className="flex justify-center">
+        <IntroIcon />
+      </div>
+
+      <div className="mt-6 flex items-center justify-center gap-2" aria-hidden="true">
+        <span className="h-2 w-8 rounded-full bg-slate-900" />
+        <span className="h-2 w-2 rounded-full bg-slate-200" />
+        <span className="h-2 w-2 rounded-full bg-slate-200" />
+      </div>
+
+      <div className="mt-7 text-center">
+        <h2 className="text-[2rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.25rem]">Get Started</h2>
+        <p className="mx-auto mt-4 max-w-[24rem] text-sm leading-7 text-slate-600 sm:text-[15px]">
+          To build a realistic starting point, we&apos;ll ask a few quick details. This is not an application and there is zero commitment required.
+        </p>
+      </div>
+
+      <div className="mt-7 grid gap-3 sm:grid-cols-3">
+        {QUICK_REVIEW_TRUST_CUES.map(({ icon, label }) => (
+          <TrustCue key={label} icon={icon} label={label} />
+        ))}
+      </div>
+
+      <div className="my-7 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+
+      <div className="space-y-3">
+        <PrimaryActionButton onClick={onPrimary}>Build My Starting Plan</PrimaryActionButton>
+        <SecondaryActionButton onClick={onSecondary}>Wait, go back</SecondaryActionButton>
+      </div>
+    </motion.div>
+  </motion.div>
+);
 
 const CelebrationOverlay = ({ active, src, className = '' }) => {
   if (!active) {
@@ -1048,19 +1157,7 @@ function App() {
   };
 
   const renderQuoteTransition = () => (
-    <div className="h-full w-full flex flex-col items-center justify-center p-8 bg-slate-50 relative overflow-hidden animate-fade-in text-center">
-      <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center text-4xl mb-8 shadow-sm border border-slate-100">✨</div>
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-4 tracking-tight">Find Your Starting Point</h2>
-      <p className="text-slate-500 leading-relaxed mb-10 text-sm font-medium">
-        To build a realistic starting point, we&apos;ll ask a few quick details. This is not an application and there is zero commitment required.
-      </p>
-      <div className="w-full space-y-4">
-        <Button onClick={() => setScreen('quote_form')}>Start My Quick Review</Button>
-        <button onClick={() => setScreen('dashboard')} className="w-full py-3 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 transition-colors">
-          Wait, go back
-        </button>
-      </div>
-    </div>
+    <QuickReviewIntroScreen onPrimary={() => setScreen('quote_form')} onSecondary={() => setScreen('dashboard')} />
   );
 
   const renderQuoteForm = () => {

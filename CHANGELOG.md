@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.5.6 - 2026-06-10
+
+Prompt context:
+- Refine the quote transition screen so it feels less boxed-in and the primary CTA has a softer, more premium glow without changing the text or behavior.
+
+Changes:
+- Removed the outer border from the transition card so the screen reads as a full-screen app surface instead of a phone-shell mockup.
+- Kept the inner card as the visual container and preserved the subtle shadow, rounded corners, and layered background treatment.
+- Added a subtler pulsing glow treatment to the primary CTA to improve visual emphasis without making it feel aggressive.
+- Preserved all existing quote transition text, navigation, and interaction behavior.
+- Bumped project version for the transition screen polish pass.
+
+## 1.5.5 - 2026-06-10
+
+Prompt context:
+- Improve the quote transition screen so it feels calm, premium, mobile-first, and conversion-friendly while keeping the exact current text and existing routing behavior.
+
+Changes:
+- Reworked the quote transition into a centered premium intro card with softer background atmosphere, stronger visual hierarchy, and better mobile spacing.
+- Replaced the emoji-only icon treatment with a polished lucide-react compass-led icon block and subtle decorative accent.
+- Added a low-pressure trust cue row with compact icon chips and a soft progress preview to reinforce privacy and guidance without changing the required copy.
+- Swapped the static buttons for framer-motion-powered primary and secondary actions with tap/hover feedback and stronger focus states.
+- Kept the exact headline, description, primary CTA, and secondary button text unchanged while preserving the existing screen routing behavior.
+- Bumped project version for the quote transition UI/UX refinement.
+
 ## 1.5.4 - 2026-06-10
 
 Prompt context:
