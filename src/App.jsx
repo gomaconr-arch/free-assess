@@ -1,65 +1,65 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Lottie from 'lottie-react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
+
+const Lottie = lazy(() => import('lottie-react'));
 
 const LOTTIE_URLS = {
-  checkmark: 'https://assets10.lottiefiles.com/packages/lf20_jbrw3hcz.json',
-  microCelebrate: 'https://assets10.lottiefiles.com/packages/lf20_touohxv0.json',
-  roadmapCelebrate: 'https://assets10.lottiefiles.com/packages/lf20_x62chJ.json',
-  fortressReveal: 'https://assets10.lottiefiles.com/packages/lf20_1a8dx7zj.json',
-  success: 'https://assets10.lottiefiles.com/packages/lf20_jbrw3hcz.json'
+  checkmark: 'checkmark',
+  microCelebrate: 'microCelebrate',
+  roadmapCelebrate: 'roadmapCelebrate',
+  fortressReveal: 'fortressReveal',
+  success: 'checkmark'
 };
 
-const animationCache = new Map();
+const animationLoaders = {
+  checkmark: () => import('./assets/lottie/checkmark.json'),
+  microCelebrate: () => import('./assets/lottie/microCelebrate.json'),
+  roadmapCelebrate: () => import('./assets/lottie/roadmapCelebrate.json'),
+  fortressReveal: () => import('./assets/lottie/fortressReveal.json')
+};
 
 const RemoteLottie = ({ src, loop = true, autoplay = true, className = '', style, onComplete }) => {
-  const [animationData, setAnimationData] = useState(() => animationCache.get(src) || null);
-  const [loadState, setLoadState] = useState(() => (animationCache.has(src) ? 'ready' : 'loading'));
+  const [animationData, setAnimationData] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    if (animationCache.has(src)) {
-      setAnimationData(animationCache.get(src));
-      setLoadState('ready');
-      return () => {};
+    if (!src || !animationLoaders[src]) {
+      setAnimationData(null);
+      return () => {
+        isMounted = false;
+      };
     }
 
-    setLoadState('loading');
-
-    fetch(src)
-      .then((response) => response.json())
-      .then((data) => {
-        animationCache.set(src, data);
-        if (isMounted) {
-          setAnimationData(data);
-          setLoadState('ready');
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setAnimationData(null);
-          setLoadState('error');
-        }
-      });
+    animationLoaders[src]().then((module) => {
+      if (isMounted) {
+        setAnimationData(module.default);
+      }
+    });
 
     return () => {
       isMounted = false;
     };
   }, [src]);
 
-  if (loadState !== 'ready' || !animationData) {
+  if (!animationData) {
     return (
       <div className={`flex items-center justify-center ${className}`} aria-hidden="true">
-        {loadState === 'loading' ? (
-          <div className="h-8 w-8 rounded-full border-2 border-slate-200 border-t-slate-800 animate-spin" />
-        ) : (
-          <div className="h-8 w-8 rounded-full bg-slate-200/80 ring-4 ring-white/70" />
-        )}
+        <div className="h-8 w-8 rounded-full bg-slate-200/80 ring-4 ring-white/70" />
       </div>
     );
   }
 
-  return <Lottie animationData={animationData} loop={loop} autoplay={autoplay} onComplete={onComplete} className={className} style={style} />;
+  return (
+    <Suspense
+      fallback={
+        <div className={`flex items-center justify-center ${className}`} aria-hidden="true">
+          <div className="h-8 w-8 rounded-full bg-slate-200/80 ring-4 ring-white/70" />
+        </div>
+      }
+    >
+      <Lottie animationData={animationData} loop={loop} autoplay={autoplay} onComplete={onComplete} className={className} style={style} />
+    </Suspense>
+  );
 };
 
 const JOURNEY_MODULES = [
@@ -283,11 +283,57 @@ const AnalyzingScreen = ({ onComplete }) => {
 
 const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebrationActive }) => {
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [isInlineCtaVisible, setIsInlineCtaVisible] = useState(false);
+  const scrollContainerRef = useRef(null);
+  const inlineCtaRef = useRef(null);
+
+  useEffect(() => {
+    const root = scrollContainerRef.current;
+    const target = inlineCtaRef.current;
+
+    if (!root || !target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInlineCtaVisible(entry.isIntersecting);
+      },
+      {
+        root,
+        threshold: 0.2
+      }
+    );
+
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="bg-slate-50 h-full flex flex-col overflow-y-auto hide-scrollbar relative overflow-hidden">
+    <div
+      ref={scrollContainerRef}
+      className="bg-slate-50 h-full flex flex-col overflow-y-auto hide-scrollbar relative overflow-hidden"
+    >
       <CelebrationOverlay active={celebrationActive} src={LOTTIE_URLS.fortressReveal} className="bg-white/30 backdrop-blur-[2px]" />
       <div className="bg-white px-6 pt-12 pb-10 rounded-b-[2.5rem] shadow-sm border-b border-slate-100 text-center relative z-10 shrink-0 animate-slide-up">
+        {/* Share & Save icon buttons — relocated from bottom row */}
+        <div className="absolute top-4 right-4 flex gap-2 z-20">
+          <button
+            aria-label="Share link"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-slate-100 shadow-sm text-slate-500 hover:text-indigo-600 hover:border-indigo-100 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </button>
+          <button
+            aria-label="Save image"
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-slate-100 shadow-sm text-slate-500 hover:text-emerald-600 hover:border-emerald-100 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+          </button>
+        </div>
         <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Your Financial Fortress</h2>
 
         <div className="relative mx-auto w-40 h-40 mb-6">
@@ -338,7 +384,7 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
         </div>
       </div>
 
-      <div className="px-5 mt-6 mb-6 flex-1 space-y-4">
+      <div className="px-5 mt-6 mb-6 pb-40 flex-1 space-y-4">
         <h3 className="font-bold text-slate-800 px-1 text-sm">Layer Analysis</h3>
 
         {data.threats.map((threat, idx) => (
@@ -360,16 +406,21 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
           </div>
         ))}
 
-          <div className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <div ref={inlineCtaRef} className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10">
             <span className="text-3xl mb-3 block">{data.cta.icon}</span>
             <h3 className="text-lg font-bold mb-2 tracking-tight">{data.cta.headline}</h3>
             <p className="text-sm text-slate-300 mb-6 leading-relaxed font-medium">{data.cta.hook}</p>
 
-            <Button onClick={onTransitionToQuote} variant="emerald" className="py-3.5 mb-3 animate-pulse-glow">
-              {data.cta.buttonText}
+            <Button
+              onClick={onTransitionToQuote}
+              variant="emerald"
+              className="mb-3 animate-pulse-soft shadow-[0_12px_32px_rgba(16,185,129,0.3)]"
+            >
+                {data.cta.buttonText}
             </Button>
+
             <button
               onClick={onResetJourney}
               className="w-full py-2.5 mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 transition-colors"
@@ -380,25 +431,34 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
           </div>
         </div>
 
-        <div className="mt-4 flex gap-3 animate-slide-up" style={{ animationDelay: '0.5s' }}>
-          <button className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-[1rem] bg-indigo-50 text-indigo-700 font-bold text-sm hover:bg-indigo-100 transition-colors border border-indigo-100/50">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-              />
-            </svg>
-            Share Link
-          </button>
-          <button className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-[1rem] bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100 transition-colors border border-emerald-100/50">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Save Image
-          </button>
+      </div>
+
+      <div
+        className={`sticky bottom-0 z-30 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 md:hidden transition-all duration-300 ease-out ${
+          isInlineCtaVisible ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+        }`}
+      >
+        <div className="mx-auto max-w-lg rounded-2xl border border-white/70 bg-white/80 backdrop-blur-md shadow-[0_-10px_30px_rgba(15,23,42,0.12)] p-3">
+          <Button
+            onClick={onTransitionToQuote}
+            variant="emerald"
+            className="animate-pulse-soft shadow-[0_12px_28px_rgba(16,185,129,0.25)]"
+          >
+              {data.cta.buttonText}
+          </Button>
         </div>
+      </div>
+
+      {/* Sticky glassmorphism footer — always visible, inherits container width from app-shell max-w-md */}
+      <div
+        className={`sticky bottom-0 z-40 border-t border-slate-200 bg-white/90 supports-[backdrop-filter]:bg-white/80 backdrop-blur-md px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] shadow-[0_-10px_20px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out ${
+          isInlineCtaVisible ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+        }`}
+      >
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3 text-center">{data.cta.headline}</p>
+        <Button onClick={onTransitionToQuote} variant="emerald" className="py-3.5 animate-pulse-glow">
+          {data.cta.buttonText}
+        </Button>
       </div>
     </div>
   );
@@ -990,7 +1050,7 @@ function App() {
   const renderQuoteTransition = () => (
     <div className="h-full w-full flex flex-col items-center justify-center p-8 bg-slate-50 relative overflow-hidden animate-fade-in text-center">
       <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center text-4xl mb-8 shadow-sm border border-slate-100">✨</div>
-      <h2 className="text-2xl font-extrabold text-slate-800 mb-4 tracking-tight">Let&apos;s personalize your estimate.</h2>
+      <h2 className="text-2xl font-extrabold text-slate-800 mb-4 tracking-tight">Find Your Starting Point</h2>
       <p className="text-slate-500 leading-relaxed mb-10 text-sm font-medium">
         To build a realistic starting point, we&apos;ll ask a few quick details. This is not an application and there is zero commitment required.
       </p>

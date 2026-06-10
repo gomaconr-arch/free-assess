@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Financial Foundation Check - Product Documentation</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --ink:#e5e7eb; --muted:#9ca3af; --line:#374151; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background:#0b1020; color:var(--ink); }
+    .wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #111827; border:1px solid #1f2937; border-radius: 14px; padding: 18px; }
+    h1 { margin: 0 0 12px; font-size: 24px; }
+    .note { color: var(--muted); margin: 0 0 14px; font-size: 13px; }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      line-height: 1.45;
+      font-size: 14px;
+      color: #e5e7eb;
+      background: #0b1220;
+      border: 1px solid #253045;
+      border-radius: 10px;
+      padding: 16px;
+      overflow: auto;
+    }
+    a { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Financial Foundation Check - Technical Product Documentation</h1>
+      <p class="note">Documentation source analyzed from app code and project files.</p>
+      <pre>
+# 1. App Overview
+
+## What the app does
+Financial Foundation Check is a guided financial profile web app that helps users assess their current financial readiness, generate a scored "Financial Fortress" result, and request a personalized estimate follow-up.
+
+## Who it is for
+- Individuals who want a quick financial readiness check
+- Users exploring protection, emergency fund, and goal planning options
+- Leads who may want advisor guidance without immediate commitment
+
+## Main business purpose
+- Educate and qualify users through a short structured journey
+- Convert completed assessments into advisor-ready estimate requests
+- Capture contact intent data with consent
+
+## Main user outcome
+- User gets a personalized readiness score, category, and recommendations
+- User can submit details for a free personalized review
+
+---
+
+# 2. UI/UX Flow
+
+## End-to-end journey
+1. Welcome screen introduces the experience and prompts user to start.
+2. Hub screen shows module roadmap and progression.
+3. Module screens collect profile answers in sequence (single and multi-select questions).
+4. Analyze transition screen displays a short "building" animation/message.
+5. Dashboard screen presents score, persona, layer analysis, and CTA actions.
+6. Quote transition screen explains the next step before data collection.
+7. Multi-step quote form captures profile and contact details.
+8. Quote teaser confirmation screen summarizes request status and next steps.
+
+## UX patterns used
+- Guided flow with progressive disclosure
+- Locked/unlocked modules based on completion order
+- Animated feedback on completion and transitions
+- Sticky CTA behavior in dashboard with observer-based collision handling
+- Validation-based continue buttons for all forms
+
+---
+
+# 3. Screen-by-Screen Documentation
+
+## Screen: Welcome
+### Purpose
+Start point that frames the product as a quick personal roadmap.
+
+### Main UI sections
+- Brand/title block
+- Short explanatory text
+- Primary start button
+- Time estimate badge
+
+### Buttons and actions
+- Start My Journey: moves user into hub flow
+
+### Forms and input fields
+- None
+
+### After interaction
+- Navigates to hub screen
+
+---
+
+## Screen: Hub (Profile Journey)
+### Purpose
+Central roadmap showing available modules, progress, and completion status.
+
+### Main UI sections
+- Header with overall progress bar
+- Module cards (complete, next, locked states)
+- Optional mini insight message after partial progress
+- Bottom Analyze CTA when all modules complete
+
+### Buttons and actions
+- Tapping next module card opens module questionnaire
+- See My Results appears only after all modules complete and readiness state is true
+
+### Forms and input fields
+- None directly, but entry point to module question forms
+
+### Validation/progression
+- Only the next eligible module is clickable
+- Locked modules cannot be opened
+
+### After interaction
+- Opens module screen or analyzing screen based on action
+
+---
+
+## Screen: Module Questionnaire
+### Purpose
+Collect user financial profile data module by module.
+
+### Main UI sections
+- Header with step indicator and module progress
+- Question block and helper text
+- Option cards (single-select or multi-select)
+- Sticky continue button area
+
+### Buttons and actions
+- Back returns to previous question or hub
+- Continue advances to next question
+- Finish Module marks module complete
+
+### Forms and input fields
+- Option-card selection only (no free text in this phase)
+
+### Validation
+- Continue button disabled until minimum valid selection exists
+
+### After interaction
+- Next question or return to hub with completion effects
+- Final module completion unlocks analyze readiness
+
+---
+
+## Screen: Analyzing
+### Purpose
+Create anticipation while transitioning to results.
+
+### Main UI sections
+- Loading spinner/visual
+- Dynamic status text sequence
+
+### Buttons and actions
+- None
+
+### Forms and input fields
+- None
+
+### After interaction
+- Auto-navigates to dashboard after timeout
+
+---
+
+## Screen: Dashboard (Financial Fortress)
+### Purpose
+Present computed score, persona, risk/threat analysis, and recommendation CTA.
+
+### Main UI sections
+- Score header with ring, persona, and optional breakdown
+- Layer analysis cards
+- Inline dark CTA card with action
+- Sticky CTA footer area with observer-controlled visibility
+- Reset action
+
+### Buttons and actions
+- Share/Save icon actions in header (UI action buttons)
+- Review/Explore CTA opens quote transition
+- Reset Journey restarts full flow
+
+### Forms and input fields
+- None
+
+### Validation and states
+- Sticky CTA hides when inline CTA enters viewport
+- Sticky CTA reappears when inline CTA leaves viewport
+- Breakdown accordion toggles open/closed state
+
+### After interaction
+- Transitions to quote transition or restarts app state
+
+---
+
+## Screen: Quote Transition
+### Purpose
+Set expectations before collecting personal details.
+
+### Main UI sections
+- Intro headline
+- Explanation text
+- Primary start review button
+- Secondary go back action
+
+### Buttons and actions
+- Start My Quick Review: enters quote form
+- Wait, go back: returns to dashboard
+
+### Forms and input fields
+- None
+
+### After interaction
+- Moves to quote form step 1 or back to dashboard
+
+---
+
+## Screen: Quote Form (4-step)
+### Purpose
+Capture user details needed for a personalized estimate follow-up.
+
+### Main UI sections by step
+- Step 1: Basic details (birthdate, gender)
+- Step 2: Primary focus selection
+- Step 3: Budget/comfort range selection
+- Step 4: Contact details + consent
+
+### Buttons and actions
+- Back returns to previous step or quote transition
+- Continue advances if valid
+- Request My Free Review submits form flow and opens confirmation
+
+### Validation highlights
+- Step 1 requires date of birth and gender
+- Step 2 requires goal selection
+- Step 3 requires budget selection
+- Step 4 requires name, phone, and consent checkbox
+
+### After interaction
+- Final step triggers success celebration and navigates to teaser/confirmation
+
+---
+
+## Screen: Quote Teaser (Confirmation)
+### Purpose
+Confirm request status and summarize key choices.
+
+### Main UI sections
+- Success header
+- Snapshot summary card
+- Next-steps explanation card
+- Action buttons
+
+### Buttons and actions
+- Back to My Fortress: returns to dashboard
+- Start Over: resets the full app state
+
+### Forms and input fields
+- None
+
+### After interaction
+- Returns to dashboard context or full restart
+
+---
+
+# 4. Forms and Fields
+
+## Form inventory table
+
+| Form Name | Field Label | Field Type | Required | User Purpose | Where Used |
+|---|---|---|---|---|---|
+| Module: Life Snapshot | Which best describes your current life stage | Single-select options | Yes to proceed | Capture household context | Impacts profile context and later personalization |
+| Module: Cash Flow Check | Income stability | Single-select options | Yes to proceed | Gauge income predictability | Contributes to cashflow score breakdown |
+| Module: Cash Flow Check | Savings habit | Single-select options | Yes to proceed | Measure saving behavior | Contributes to cashflow score breakdown |
+| Module: Safety Net | Emergency fund duration | Single-select options | Yes to proceed | Estimate emergency readiness | Contributes to emergency score breakdown |
+| Module: The Shield | Current protection cover | Multi-select options | Yes to proceed | Identify existing protection layers | Contributes to protection score and threat logic |
+| Module: The Shield | Dependents | Multi-select options | Yes to proceed | Determine income dependency risk | Drives family-related CTA/threat logic |
+| Module: Goals & Direction | Top priorities | Multi-select with max 2 | Yes to proceed | Identify user intent | Contributes to goals score and CTA logic |
+| Quote Step 1 | Birthdate | Date input | Yes | Age-related estimate context | Included in quote data payload |
+| Quote Step 1 | Gender | Button select | Yes | Estimate context | Included in quote data payload |
+| Quote Step 2 | Primary focus | Option card select | Yes | Define recommendation focus | Included in quote data payload |
+| Quote Step 3 | Starting level budget | Option card select | Yes | Match options to comfort range | Included in quote data payload |
+| Quote Step 4 | Full Name | Text input | Yes | Contact identity | Included in quote data payload |
+| Quote Step 4 | Mobile Number | Tel input | Yes | Contact channel | Included in quote data payload |
+| Quote Step 4 | Consent | Checkbox | Yes | Permission to contact | Gates submission |
+
+## Conditional form behavior
+- Multi-select fields allow multiple answers and can enforce max selections
+- Some multi-select sets treat "none" as exclusive
+- Continue/submit actions remain disabled until current step is valid
+- Contact step blocks submission without consent
+
+---
+
+# 5. Business Logic
+
+## Progression rules
+- Modules follow ordered unlocking: next module unlocks only after previous completion
+- Final results CTA appears only when all modules are completed and readiness flag is set
+- Quote form progresses in fixed sequence with per-step validation
+
+## Scoring model
+- Total score aggregates category breakdowns:
+  - Cash flow
+  - Emergency
+  - Protection
+  - Goals
+- Category values are computed from selected answers
+- Persona and ring color are derived from score thresholds
+
+## Persona outcomes
+- High score: strong foundation persona
+- Mid score: on-track persona
+- Lower score: building phase persona
+
+## Threat generation logic
+- Emergency fund level drives unexpected expense risk messaging
+- Health coverage presence/absence drives health risk messaging
+- Dependents + missing life cover can trigger family backup warning
+
+## CTA generation logic
+CTA text and focus change based on user profile combinations, including:
+- Dependents and missing life protection
+- No protection selected
+- Investment priority with low resilience score
+- Default momentum-building path
+
+## Observer-based layout logic
+- Dashboard sticky CTA visibility is controlled by an IntersectionObserver
+- When inline dark CTA enters viewport, sticky CTA slides out and disables pointer events
+- When inline CTA leaves viewport, sticky CTA slides back in
+
+## Submission behavior
+- Quote final step triggers confirmation state and success animation
+- No backend persistence is visible in current code; behavior is in-memory UI flow
+
+---
+
+# 6. Tech Stack
+
+## Core frontend
+- React 18 app shell and component model
+- Vite 5 build/dev tooling
+- Tailwind CSS utility styling with custom CSS animations
+- Lottie React for motion assets
+
+## State management
+- Local component state via React hooks
+- Single-screen state machine pattern using screen variable (no dedicated router)
+
+## Routing
+- No URL-based routing
+- Screen transitions are state-driven inside one SPA component tree
+
+## Data storage
+- In-memory only (runtime state)
+- No API calls or local storage persistence visible in provided code
+
+## Deployment setup
+- Static build output for hosting
+- Cloudflare Pages-compatible config and headers
+- Optional base-path support via environment variable for subpath deployments
+
+## Integrations and assets
+- Local bundled Lottie JSON files
+- Local self-hosted Figtree font files
+- No external runtime API dependencies required for core flow
+
+---
+
+# 7. Components and Structure
+
+## Main components
+- App: root flow controller and screen orchestration
+- DashboardScreen: result dashboard with score, analysis, and CTA behavior
+- AnalyzingScreen: timed transition view
+- ScoreRing: score visual component
+- Button: reusable action component
+- CelebrationOverlay and RemoteLottie: animation wrappers
+
+## Layout patterns
+- Mobile-first centered app shell with desktop frame constraints
+- Sticky bottom action zones for key CTAs
+- Card-based content sections and layered visual hierarchy
+
+## Data flow summary
+- User answers collected through module and quote steps
+- Derived dashboard data computed from answers
+- Computed result object passed into dashboard for display logic
+- CTA action routes user into quote collection flow
+
+## Important files
+- [src/App.jsx](src/App.jsx)
+- [src/main.jsx](src/main.jsx)
+- [src/styles.css](src/styles.css)
+- [package.json](package.json)
+- [vite.config.js](vite.config.js)
+- [tailwind.config.js](tailwind.config.js)
+- [README.md](README.md)
+- [public/_headers](public/_headers)
+
+---
+
+# 8. User Roles and Use Cases
+
+## Primary user role
+- Individual end-user evaluating financial readiness and exploring protection options
+
+## Business-side stakeholders
+- Advisors or lead follow-up teams receiving user interest
+- Product, design, and operations teams tracking flow completion and conversion points
+
+## Problems solved
+- Users need a simple, non-intimidating financial readiness check
+- Users need personalized next-step guidance based on current profile
+- Business needs qualified, consented leads from a guided funnel
+
+## Main use cases
+- Quick self-assessment in minutes
+- Identify weak areas (savings, protection, dependence risks)
+- Request a free follow-up estimate without immediate commitment
+
+---
+
+# 9. Conditions and Edge Cases
+
+## Disabled and gated states
+- Continue buttons disabled until required input is present
+- Locked module cards are non-interactive
+- Final submit is blocked until consent is checked
+
+## Completed states
+- Module completion triggers visual confirmation effects
+- Completed modules show check state and timing message
+- Final module completion unlocks analyze action after transition timing
+
+## Conditional messaging
+- Mini insight appears at specific partial completion points
+- Threat cards change by profile conditions
+- CTA headline/hook/button text changes by detected user needs
+
+## Empty states
+- Before any module completion, hub shows roadmap with locked future modules
+- Optional sections (breakdown accordion) can remain collapsed with clean default view
+
+## Error handling visibility
+- No explicit server/API error states observed (no network submission in current code)
+- Primary safeguards are form validation and disabled actions
+
+## Transitions and redirects
+- All transitions are state-driven inside a single-page flow
+- Timed transitions used for analyzing and celebration phases
+- Restart function clears all in-memory state and returns to welcome
+
+---
+
+# 10. Source References
+
+- App flow and business logic: [src/App.jsx](src/App.jsx)
+- Entry point and mount: [src/main.jsx](src/main.jsx)
+- Styling, typography, animations: [src/styles.css](src/styles.css)
+- Dependencies and scripts: [package.json](package.json)
+- Build/base path config: [vite.config.js](vite.config.js)
+- Tailwind scanning/config baseline: [tailwind.config.js](tailwind.config.js)
+- Deployment and product notes: [README.md](README.md)
+- Cloudflare headers and CSP: [public/_headers](public/_headers)
+      </pre>
+    </div>
+  </div>
+</body>
+</html>
