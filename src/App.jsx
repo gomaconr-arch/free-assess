@@ -392,36 +392,9 @@ const AnalyzingScreen = ({ onComplete }) => {
 
 const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebrationActive }) => {
   const [showBreakdown, setShowBreakdown] = useState(false);
-  const [isInlineCtaVisible, setIsInlineCtaVisible] = useState(false);
-  const scrollContainerRef = useRef(null);
-  const inlineCtaRef = useRef(null);
-
-  useEffect(() => {
-    const root = scrollContainerRef.current;
-    const target = inlineCtaRef.current;
-
-    if (!root || !target) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsInlineCtaVisible(entry.isIntersecting);
-      },
-      {
-        root,
-        threshold: 0.2
-      }
-    );
-
-    observer.observe(target);
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="bg-slate-50 h-full flex flex-col overflow-y-auto hide-scrollbar relative overflow-hidden"
-    >
+    <div className="bg-slate-50 h-full overflow-y-auto hide-scrollbar relative">
       <CelebrationOverlay active={celebrationActive} src={LOTTIE_URLS.fortressReveal} className="bg-white/30 backdrop-blur-[2px]" />
       <div className="bg-white px-6 pt-12 pb-10 rounded-b-[2.5rem] shadow-sm border-b border-slate-100 text-center relative z-10 shrink-0 animate-slide-up">
         {/* Share & Save icon buttons — relocated from bottom row */}
@@ -493,7 +466,7 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
         </div>
       </div>
 
-      <div className="px-5 mt-6 mb-6 pb-40 flex-1 space-y-4">
+      <div className="px-5 mt-6 mb-8 pb-10 space-y-4">
         <h3 className="font-bold text-slate-800 px-1 text-sm">Layer Analysis</h3>
 
         {data.threats.map((threat, idx) => (
@@ -515,7 +488,7 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
           </div>
         ))}
 
-          <div ref={inlineCtaRef} className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
+          <div className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10">
             <span className="text-3xl mb-3 block">{data.cta.icon}</span>
@@ -540,34 +513,6 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
           </div>
         </div>
 
-      </div>
-
-      <div
-        className={`sticky bottom-0 z-30 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 md:hidden transition-all duration-300 ease-out ${
-          isInlineCtaVisible ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
-        }`}
-      >
-        <div className="mx-auto max-w-lg rounded-2xl border border-white/70 bg-white/80 backdrop-blur-md shadow-[0_-10px_30px_rgba(15,23,42,0.12)] p-3">
-          <Button
-            onClick={onTransitionToQuote}
-            variant="emerald"
-            className="animate-pulse-soft shadow-[0_12px_28px_rgba(16,185,129,0.25)]"
-          >
-              {data.cta.buttonText}
-          </Button>
-        </div>
-      </div>
-
-      {/* Sticky glassmorphism footer — always visible, inherits container width from app-shell max-w-md */}
-      <div
-        className={`sticky bottom-0 z-40 border-t border-slate-200 bg-white/90 supports-[backdrop-filter]:bg-white/80 backdrop-blur-md px-5 pt-4 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] shadow-[0_-10px_20px_rgba(0,0,0,0.05)] transition-all duration-300 ease-out ${
-          isInlineCtaVisible ? 'translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
-        }`}
-      >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3 text-center">{data.cta.headline}</p>
-        <Button onClick={onTransitionToQuote} variant="emerald" className="py-3.5 animate-pulse-glow">
-          {data.cta.buttonText}
-        </Button>
       </div>
     </div>
   );
@@ -1241,7 +1186,7 @@ function App() {
       }
 
       if (quoteStep === 4) {
-        return quoteData.name && quoteData.phone && quoteData.consent;
+        return quoteData.name && quoteData.phone && quoteData.email && quoteData.consent;
       }
 
       return false;
@@ -1430,7 +1375,7 @@ function App() {
           {quoteStep === 4 && (
             <div className="animate-fade-in">
               <h2 className="text-xl font-extrabold text-slate-800 mb-2">Almost done!</h2>
-              <p className="text-slate-500 text-sm mb-6 font-medium">Where should we send your personalized estimate?</p>
+              <p className="text-slate-500 text-sm mb-6 font-medium">Where should we send your detailed profile assessment?</p>
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1">Full Name</label>
@@ -1452,6 +1397,19 @@ function App() {
                     className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-slate-800 focus:outline-none font-medium text-slate-700 shadow-sm"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    placeholder="juan@example.com"
+                    value={quoteData.email}
+                    onChange={(e) => updateQuote('email', e.target.value)}
+                    className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-slate-800 focus:outline-none font-medium text-slate-700 shadow-sm"
+                  />
+                  <p className="mt-2 text-[11px] text-slate-400 font-medium leading-relaxed">
+                    We&apos;ll use this email to send your detailed profile assessment and helpful follow-up guidance related to your results.
+                  </p>
+                </div>
                 <div className="pt-2 flex items-start gap-3 bg-slate-100/50 p-4 rounded-2xl border border-slate-100">
                   <div
                     className={`mt-0.5 w-5 h-5 flex-shrink-0 border-2 rounded flex items-center justify-center cursor-pointer transition-colors ${quoteData.consent ? 'border-slate-800 bg-slate-800' : 'border-slate-300 bg-white'}`}
@@ -1464,7 +1422,7 @@ function App() {
                     )}
                   </div>
                   <p className="text-[11px] text-slate-500 font-medium leading-relaxed cursor-pointer" onClick={() => updateQuote('consent', !quoteData.consent)}>
-                    I agree to be contacted for a personalized estimate based on my profile. No payment or application is required.
+                    I agree to receive my detailed profile assessment by email and to be contacted with relevant follow-up guidance. No payment or application is required.
                   </p>
                 </div>
               </div>
@@ -1507,9 +1465,9 @@ function App() {
               </div>
               <div className="flex justify-between items-end pb-1">
                 <span className="text-xs text-slate-500 font-medium">Status</span>
-                <span className="font-bold text-indigo-600 text-sm text-right flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
-                  Processing Request
+                <span className="font-bold text-emerald-600 text-sm text-right flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                  Profile Shared
                 </span>
               </div>
             </div>
@@ -1518,7 +1476,7 @@ function App() {
           <div className="bg-slate-100/50 rounded-[1.5rem] p-6 border border-slate-200/50 text-center">
             <h3 className="font-bold text-slate-800 mb-2 text-sm">What happens next?</h3>
             <p className="text-xs text-slate-500 leading-relaxed mb-0 font-medium">
-              An advisor will review your profile and reach out to share beginner-friendly options. Feel free to ask questions with absolutely zero commitment.
+              We&apos;ll send your detailed profile assessment by email and may follow up with guidance that matches your results. Feel free to ask questions with absolutely zero commitment.
             </p>
           </div>
 
