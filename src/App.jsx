@@ -387,7 +387,7 @@ const AnalyzingScreen = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className="h-full flex flex-col justify-center items-center p-8 bg-slate-800 text-white text-center animate-fade-in relative overflow-hidden">
+    <div className="h-full min-h-[100dvh] md:min-h-full flex flex-col justify-center items-center p-8 bg-slate-800 text-white text-center animate-fade-in relative overflow-hidden">
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
       <div className="relative z-10 w-24 h-24 mb-8">
         <div className="absolute inset-0 border-4 border-slate-600 rounded-full border-t-emerald-400 animate-spin"></div>
@@ -403,7 +403,7 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
   const [showBreakdown, setShowBreakdown] = useState(false);
 
   return (
-    <div className="bg-slate-50 h-full overflow-y-auto hide-scrollbar relative">
+    <div className="app-scroll bg-slate-50 h-full hide-scrollbar relative">
       <CelebrationOverlay active={celebrationActive} src={LOTTIE_URLS.fortressReveal} className="bg-white/30 backdrop-blur-[2px]" />
       <div className="bg-white px-6 pt-12 pb-10 rounded-b-[2.5rem] shadow-sm border-b border-slate-100 text-center relative z-10 shrink-0 animate-slide-up">
         {/* Share & Save icon buttons — relocated from bottom row */}
@@ -479,7 +479,7 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
         </div>
       </div>
 
-      <div className="px-5 mt-6 mb-8 pb-10 space-y-4">
+      <div className="px-5 mt-6 mb-8 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] space-y-4">
         <h3 className="font-bold text-slate-800 px-1 text-sm">Layer Analysis</h3>
 
         {data.threats.map((threat, idx) => (
@@ -1516,7 +1516,7 @@ function App() {
   };
 
   return (
-    <div className="app-shell w-full h-full md:max-w-md md:h-[850px] md:max-h-[95vh] relative md:rounded-[2.5rem] md:shadow-2xl overflow-hidden flex flex-col md:border-[8px] md:border-slate-800 bg-white">
+    <div className="app-shell w-full md:max-w-md md:h-[850px] md:min-h-0 md:max-h-[95vh] relative md:rounded-[2.5rem] md:shadow-2xl overflow-hidden flex flex-col md:border-[8px] md:border-slate-800 bg-white">
       <div className="flex-1 overflow-hidden relative">
         {screen === 'welcome' && renderWelcome()}
         {screen === 'hub' && renderHub()}
