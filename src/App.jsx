@@ -589,6 +589,7 @@ function App() {
   });
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [quoteStep, setQuoteStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [quoteData, setQuoteData] = useState({
     dob: '',
     gender: '',
@@ -675,6 +676,7 @@ function App() {
     });
     setCurrentQIndex(0);
     setQuoteStep(1);
+    setIsSubmitting(false);
     setQuoteData({
       dob: '',
       gender: '',
@@ -1165,15 +1167,54 @@ function App() {
 
   const renderQuoteForm = () => {
     const updateQuote = (field, value) => setQuoteData((prev) => ({ ...prev, [field]: value }));
+    const submitLead = async () => {
+      if (isSubmitting) {
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      const payload = {
+        submittedAt: new Date().toISOString(),
+        currentScreen: screen,
+        completedModules,
+        activeModuleId,
+        answers,
+        quoteData,
+        scoreData: calculateFortressData,
+        moduleTimings
+      };
+
+      try {
+        const response = await fetch('/api/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error('Unable to submit your request right now.');
+        }
+
+        setQuoteSuccessCelebration(true);
+        setScreen('quote_teaser');
+        schedule(() => setQuoteSuccessCelebration(false), 2400);
+      } catch (error) {
+        alert(error.message || 'Unable to submit your request right now. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
     const nextStep = () => {
       if (quoteStep < 4) {
         setQuoteStep((prev) => prev + 1);
         return;
       }
 
-      setQuoteSuccessCelebration(true);
-      setScreen('quote_teaser');
-      schedule(() => setQuoteSuccessCelebration(false), 2400);
+      submitLead();
     };
     const prevStep = () => (quoteStep > 1 ? setQuoteStep((prev) => prev - 1) : setScreen('quote_transition'));
 
@@ -1423,8 +1464,8 @@ function App() {
         </div>
 
         <div className="absolute bottom-0 left-0 w-full p-5 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent z-20">
-          <Button disabled={!canProceed()} onClick={nextStep}>
-            {quoteStep < 4 ? 'Continue' : 'Request My Free Review'}
+          <Button disabled={!canProceed() || isSubmitting} onClick={nextStep}>
+            {quoteStep < 4 ? 'Continue' : isSubmitting ? 'Sending...' : 'Send My Summary'}
           </Button>
         </div>
       </div>

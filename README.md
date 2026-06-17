@@ -16,7 +16,7 @@ Production-ready React + Vite implementation of the Financial Foundation Profile
 
 ## Cloudflare Pages Deployment
 
-This app builds to static assets and is suitable for Cloudflare Pages without a server runtime.
+This app builds to static assets and includes a Cloudflare Pages Function at `/api/submit` for lead email submission.
 
 ### Standard deploy
 
@@ -27,6 +27,81 @@ This app builds to static assets and is suitable for Cloudflare Pages without a 
 	- Build output directory: `dist`
 	- Root directory: leave blank if this repo root is the app root
 4. Deploy.
+
+### Cloudflare native email submission setup
+
+The quote form posts lead data to `functions/api/submit.js`, which sends email through Cloudflare's native Send Email binding. The React frontend does not contain email credentials or API keys.
+
+#### 1. Enable Email Routing for your domain
+
+1. In Cloudflare, open the zone for your domain.
+2. Go to Email > Email Routing.
+3. Click Get started or Enable Email Routing.
+4. Add and verify destination addresses. This project is configured around these verified inboxes:
+	- `info@lablibre.com`
+	- `richard.badlisan@gmail.com`
+5. Open the verification email sent by Cloudflare and verify that destination address.
+6. Let Cloudflare add the required Email Routing DNS records, or add the shown MX and TXT records manually if prompted.
+7. Confirm Email Routing shows as enabled for the zone.
+
+#### 2. Configure a verified sender
+
+1. Choose a sender address on your Cloudflare zone. For this project, use `info@lablibre.com`.
+2. Make sure the sender domain is onboarded for Cloudflare Email sending.
+3. Use only a sender address from that verified Cloudflare zone. Cloudflare will reject unverified senders.
+
+#### 3. Add the Send Email binding to the Pages project
+
+1. In Cloudflare, open Workers & Pages.
+2. Select this Pages project.
+3. Go to Settings > Functions > Bindings.
+4. Add a Send Email binding.
+5. Set the binding variable name to `SEND_EMAIL`.
+6. If Cloudflare asks for restrictions, use one of these:
+	- Destination restriction: set the destination address to `info@lablibre.com`.
+	- Sender restriction: allow the sender address `info@lablibre.com`.
+7. Save the binding for Production.
+8. Add the same binding for Preview if you want preview deployments to send test emails.
+
+#### 4. Add address environment variables
+
+In the same Pages project, go to Settings > Environment variables and add:
+
+- `EMAIL_TO`: `info@lablibre.com`
+- `EMAIL_FROM`: `info@lablibre.com`
+
+If you prefer the Gmail inbox to receive lead notifications directly, set `EMAIL_TO=richard.badlisan@gmail.com` instead. Keep `EMAIL_FROM=info@lablibre.com` because the sender should be on the verified Cloudflare zone.
+
+Redeploy the Pages project after adding the binding or changing environment variables.
+
+The Function uses:
+
+```js
+await env.SEND_EMAIL.send({
+  to: env.EMAIL_TO,
+  from: env.EMAIL_FROM,
+  subject,
+  html,
+  text
+});
+```
+
+Cloudflare's Workers Email API supports this structured message format. The older raw MIME `EmailMessage` API is still supported by Cloudflare, but this project uses the current structured `send()` format.
+
+For local Cloudflare Pages Function testing, copy `.dev.vars.example` to `.dev.vars` and replace the placeholder values:
+
+```bash
+cp .dev.vars.example .dev.vars
+```
+
+The local `.dev.vars` file should not be committed.
+
+```txt
+EMAIL_TO=info@lablibre.com
+EMAIL_FROM=info@lablibre.com
+```
+
+Run the app through Cloudflare Pages local development when testing the Function endpoint locally. A plain Vite dev server will run the frontend, but it will not execute `functions/api/submit.js`. Local email binding behavior may require Wrangler remote bindings or testing on a deployed Preview/Production environment.
 
 ### Subpath deploy
 
