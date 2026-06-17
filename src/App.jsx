@@ -1195,7 +1195,16 @@ function App() {
         });
 
         if (!response.ok) {
-          throw new Error('Unable to submit your request right now.');
+          let message = 'Unable to submit your request right now.';
+
+          try {
+            const errorBody = await response.json();
+            message = errorBody.error || message;
+          } catch {
+            // Keep the generic message when Cloudflare returns a non-JSON error page.
+          }
+
+          throw new Error(message);
         }
 
         setQuoteSuccessCelebration(true);

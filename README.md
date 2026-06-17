@@ -74,19 +74,16 @@ If you prefer the Gmail inbox to receive lead notifications directly, set `EMAIL
 
 Redeploy the Pages project after adding the binding or changing environment variables.
 
-The Function uses:
+The Function uses Cloudflare's native `EmailMessage` format:
 
 ```js
-await env.SEND_EMAIL.send({
-  to: env.EMAIL_TO,
-  from: env.EMAIL_FROM,
-  subject,
-  html,
-  text
-});
+import { EmailMessage } from 'cloudflare:email';
+
+const message = new EmailMessage(from, to, rawMimeMessage);
+await env.SEND_EMAIL.send(message);
 ```
 
-Cloudflare's Workers Email API supports this structured message format. The older raw MIME `EmailMessage` API is still supported by Cloudflare, but this project uses the current structured `send()` format.
+The raw MIME message includes plain-text and HTML versions of the lead summary.
 
 For local Cloudflare Pages Function testing, copy `.dev.vars.example` to `.dev.vars` and replace the placeholder values:
 
