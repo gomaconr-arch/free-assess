@@ -30,7 +30,7 @@ This app builds to static assets and includes a Cloudflare Pages Function at `/a
 
 ### Cloudflare native email submission setup
 
-The quote form posts lead data to `functions/api/submit.js`, which sends email through Cloudflare's native Send Email binding. The React frontend does not contain email credentials or API keys.
+The quote form posts lead data to `functions/api/submit.js`, which sends email through Cloudflare's native Email Sending REST API. The React frontend does not contain email credentials or API keys.
 
 #### 1. Enable Email Routing for your domain
 
@@ -50,40 +50,41 @@ The quote form posts lead data to `functions/api/submit.js`, which sends email t
 2. Make sure the sender domain is onboarded for Cloudflare Email sending.
 3. Use only a sender address from that verified Cloudflare zone. Cloudflare will reject unverified senders.
 
-#### 3. Add the Send Email binding to the Pages project
+#### 3. Create an Email Sending API token
 
-1. In Cloudflare, open Workers & Pages.
-2. Select this Pages project.
-3. Go to Settings > Functions > Bindings.
-4. Add a Send Email binding.
-5. Set the binding variable name to `SEND_EMAIL`.
-6. If Cloudflare asks for restrictions, use one of these:
-	- Destination restriction: set the destination address to `info@lablibre.com`.
-	- Sender restriction: allow the sender address `info@lablibre.com`.
-7. Save the binding for Production.
-8. Add the same binding for Preview if you want preview deployments to send test emails.
+The Pages dashboard may not show a Send Email binding. That is expected. Use Cloudflare's REST API from the Pages Function instead.
 
-#### 4. Add address environment variables
+1. In Cloudflare, open My Profile > API Tokens.
+2. Create a custom token.
+3. Grant the token permission to send email for the account that owns `lablibre.com`.
+4. Copy the token once and keep it secret.
+5. Copy your Cloudflare Account ID from the Cloudflare dashboard.
+
+#### 4. Add Pages environment variables
 
 In the same Pages project, go to Settings > Environment variables and add:
 
+- `CLOUDFLARE_ACCOUNT_ID`: your Cloudflare account ID
+- `CLOUDFLARE_EMAIL_API_TOKEN`: the API token with Email Sending permission
 - `EMAIL_TO`: `info@lablibre.com`
 - `EMAIL_FROM`: `info@lablibre.com`
 
 If you prefer the Gmail inbox to receive lead notifications directly, set `EMAIL_TO=richard.badlisan@gmail.com` instead. Keep `EMAIL_FROM=info@lablibre.com` because the sender should be on the verified Cloudflare zone.
 
-Redeploy the Pages project after adding the binding or changing environment variables.
+Redeploy the Pages project after adding or changing environment variables.
 
-The Function uses Cloudflare's native `EmailMessage` format:
+The Function calls Cloudflare's native Email Sending REST API:
 
 ```js
-import { EmailMessage } from 'cloudflare:email';
-
-const message = new EmailMessage(from, to, rawMimeMessage);
-await env.SEND_EMAIL.send(message);
+await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/email/sending/send`, {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${env.CLOUDFLARE_EMAIL_API_TOKEN}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ to, from, subject, html, text })
+});
 ```
-
-The raw MIME message includes plain-text and HTML versions of the lead summary.
 
 For local Cloudflare Pages Function testing, copy `.dev.vars.example` to `.dev.vars` and replace the placeholder values:
 
@@ -94,11 +95,13 @@ cp .dev.vars.example .dev.vars
 The local `.dev.vars` file should not be committed.
 
 ```txt
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_EMAIL_API_TOKEN=your_email_sending_api_token
 EMAIL_TO=info@lablibre.com
 EMAIL_FROM=info@lablibre.com
 ```
 
-Run the app through Cloudflare Pages local development when testing the Function endpoint locally. A plain Vite dev server will run the frontend, but it will not execute `functions/api/submit.js`. Local email binding behavior may require Wrangler remote bindings or testing on a deployed Preview/Production environment.
+Run the app through Cloudflare Pages local development when testing the Function endpoint locally. A plain Vite dev server will run the frontend, but it will not execute `functions/api/submit.js`.
 
 ### Subpath deploy
 

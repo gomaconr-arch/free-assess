@@ -1,5 +1,3 @@
-import { EmailMessage } from 'cloudflare:email';
-
 const jsonResponse = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -46,45 +44,7 @@ const escapeHtml = (value) =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
 
-const encodeHeader = (value) => {
-  const cleanValue = String(value ?? '').replace(/[\r\n]+/g, ' ').trim();
-
-  if (/^[\x00-\x7F]*$/.test(cleanValue)) {
-    return cleanValue;
-  }
-
-  return `=?UTF-8?B?${btoa(unescape(encodeURIComponent(cleanValue)))}?=`;
-};
-
 const normalizeEmailAddress = (value) => String(value ?? '').replace(/[\r\n<>,]+/g, '').trim();
-
-const createMimeMessage = ({ from, to, subject, text, html }) => {
-  const boundary = `lead-${crypto.randomUUID()}`;
-  const headers = [
-    `From: ${normalizeEmailAddress(from)}`,
-    `To: ${normalizeEmailAddress(to)}`,
-    `Subject: ${encodeHeader(subject)}`,
-    'MIME-Version: 1.0',
-    `Content-Type: multipart/alternative; boundary="${boundary}"`
-  ];
-
-  const parts = [
-    `--${boundary}`,
-    'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    text,
-    `--${boundary}`,
-    'Content-Type: text/html; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
-    '',
-    html,
-    `--${boundary}--`,
-    ''
-  ];
-
-  return [...headers, '', ...parts].join('\r\n');
-};
 
 const formatLeadText = (payload) => {
   const quoteData = payload.quoteData || {};
@@ -155,8 +115,8 @@ const formatLeadHtml = (payload) => {
 
 export async function onRequestPost({ request, env }) {
   try {
-    if (!env.SEND_EMAIL) {
-      return jsonResponse({ error: 'Missing SEND_EMAIL binding.' }, 500);
+    if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_EMAIL_API_TOKEN) {
+      return jsonResponse({ error: 'Missing Cloudflare Email REST API configuration.' }, 500);
     }
 
     if (!env.EMAIL_TO || !env.EMAIL_FROM) {
@@ -173,23 +133,32 @@ export async function onRequestPost({ request, env }) {
     const from = normalizeEmailAddress(env.EMAIL_FROM);
     const to = normalizeEmailAddress(env.EMAIL_TO);
     const subject = `New Financial Foundation Lead: ${quoteData.name}`;
-    const message = new EmailMessage(
-      from,
-      to,
-      createMimeMessage({
-        from,
+    const emailResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/email/sending/send`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.CLOUDFLARE_EMAIL_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
         to,
+        from,
         subject,
         text: formatLeadText(payload),
         html: formatLeadHtml(payload)
       })
-    );
+    });
 
-    const result = await env.SEND_EMAIL.send(message);
+    const result = await emailResponse.json();
 
-    return jsonResponse({ ok: true, messageId: result.messageId });
+    if (!emailResponse.ok || !result.success) {
+      console.error('Cloudflare Email REST API failed:', JSON.stringify(result));
+      const message = result.errors?.[0]?.message || 'Cloudflare Email REST API failed.';
+      return jsonResponse({ error: message }, emailResponse.status || 500);
+    }
+
+    return jsonResponse({ ok: true, result: result.result });
   } catch (error) {
-    console.error('Email sending failed:', error.code, error.message);
+    console.error('Email sending failed:', error.message);
     return jsonResponse({ error: 'Submission failed.' }, 500);
   }
 }
