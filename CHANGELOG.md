@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.5.8 - 2026-06-17
+
+Prompt context:
+- Keep the app version updated whenever production-facing changes are made.
+
+Changes:
+- Added Cloudflare Pages Function lead submission support and moved email delivery to Cloudflare's native Email Sending REST API.
+- Added final-step email capture, consent copy for sending the detailed profile assessment, and clearer non-transactional success messaging.
+- Expanded lead notification emails into detailed section-by-section tables covering all journey answers, quote inputs, and fortress scoring.
+- Fixed the Financial Fortress CTA scrolling behavior by removing conflicting sticky CTA overlays and keeping the in-flow CTA tappable.
+- Updated progress bars to use percentage-specific colors instead of showing the entire red-to-green spectrum in every fill.
+- Replaced the "See My Results" RGB-style gradient with a subtle blue/sky-blue animated shine treatment.
+- Improved iOS viewport handling so the "Building Your Fortress" screen covers the full device height and the fortress page scrolls with native momentum.
+- Bumped project version for the Cloudflare email, lead-flow, progress styling, and iOS scrolling updates.
+
 ## 1.5.6 - 2026-06-10
 
 Prompt context:
