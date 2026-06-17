@@ -170,29 +170,29 @@ body {
   animation: pulse-glow 2.5s infinite ease-in-out;
 }
 
-@keyframes gradientSlide {
-  0% {
+.progress-fill {
+  box-shadow: 0 0 10px rgb(15 23 42 / 8%);
+}
+
+@keyframes resultsCtaShine {
+  0%,
+  100% {
     background-position: 0% 50%;
+    box-shadow: 0 10px 24px rgb(14 165 233 / 18%), 0 0 0 1px rgb(186 230 253 / 45%);
+    border-color: rgb(186 230 253 / 70%);
   }
 
   50% {
     background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
+    box-shadow: 0 14px 30px rgb(2 132 199 / 26%), 0 0 0 3px rgb(125 211 252 / 20%);
+    border-color: rgb(125 211 252 / 90%);
   }
 }
 
-.progress-gradient-fill {
-  background: linear-gradient(90deg, #ef4444 0%, #f97316 22%, #facc15 48%, #84cc16 72%, #22c55e 100%);
-}
-
-.cta-gradient-motion {
-  background: linear-gradient(90deg, #ef4444, #f97316, #facc15, #84cc16, #22c55e, #84cc16, #facc15, #f97316, #ef4444);
-  background-size: 220% 220%;
-  animation: gradientSlide 3.6s ease-in-out infinite;
-  box-shadow: 0 8px 24px rgb(34 197 94 / 22%);
+.cta-results-motion {
+  background: linear-gradient(110deg, #075985 0%, #0284c7 42%, #38bdf8 52%, #0284c7 62%, #075985 100%);
+  background-size: 240% 240%;
+  animation: resultsCtaShine 3.2s ease-in-out infinite;
 }
 
 @media (min-width: 768px) {

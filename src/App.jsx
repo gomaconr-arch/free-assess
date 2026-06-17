@@ -195,6 +195,15 @@ const JOURNEY_MODULES = [
   }
 ];
 
+const getProgressColor = (percent) => {
+  const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
+
+  if (safePercent <= 25) return '#ef4444';
+  if (safePercent <= 50) return '#f97316';
+  if (safePercent <= 75) return '#eab308';
+  return '#22c55e';
+};
+
 const Button = ({ children, onClick, variant = 'primary', disabled = false, className = '' }) => {
   const baseStyle = 'w-full py-4 px-6 rounded-2xl font-bold transition-all duration-200 flex items-center justify-center gap-2 text-base';
   const variants = {
@@ -448,19 +457,23 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
                 { label: 'Emergency Safety Net', value: data.breakdown.emergency, max: 20 },
                 { label: 'Protection Coverage', value: data.breakdown.protection, max: 30 },
                 { label: 'Goals & Direction', value: data.breakdown.goals, max: 25 }
-              ].map((item, idx) => (
-                <div key={idx}>
-                  <div className="flex justify-between text-[11px] font-semibold text-slate-600 mb-1">
-                    <span>{item.label}</span>
-                    <span className="text-slate-400">
-                      {item.value}/{item.max}
-                    </span>
+              ].map((item, idx) => {
+                const percent = (item.value / item.max) * 100;
+
+                return (
+                  <div key={idx}>
+                    <div className="flex justify-between text-[11px] font-semibold text-slate-600 mb-1">
+                      <span>{item.label}</span>
+                      <span className="text-slate-400">
+                        {item.value}/{item.max}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className="progress-fill h-1.5 rounded-full" style={{ width: `${percent}%`, backgroundColor: getProgressColor(percent) }}></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-100 rounded-full h-1.5">
-                    <div className="progress-gradient-fill h-1.5 rounded-full" style={{ width: `${(item.value / item.max) * 100}%` }}></div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -877,7 +890,7 @@ function App() {
             <span className="font-extrabold text-slate-800 text-lg">{Math.round(progress)}%</span>
           </div>
           <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-            <div className="progress-gradient-fill h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${progress}%` }}></div>
+            <div className="progress-fill h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${progress}%`, backgroundColor: getProgressColor(progress) }}></div>
           </div>
         </div>
 
@@ -978,7 +991,7 @@ function App() {
         <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent">
           {completedModules.length === JOURNEY_MODULES.length && analyzeButtonReady && (
             <div ref={resultsCtaRef}>
-              <Button onClick={() => setScreen('analyzing')} className="animate-pulse-glow cta-gradient-motion text-slate-900 border border-white/60">
+              <Button onClick={() => setScreen('analyzing')} className="cta-results-motion border border-sky-200/70 text-white">
                 See My Results
               </Button>
             </div>
@@ -1044,7 +1057,13 @@ function App() {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{module.title}</span>
           </div>
           <div className="w-full bg-slate-100 h-1.5 rounded-full">
-            <div className="progress-gradient-fill h-full rounded-full transition-all" style={{ width: `${((currentQIndex + 1) / module.questions.length) * 100}%` }}></div>
+            <div
+              className="progress-fill h-full rounded-full transition-all"
+              style={{
+                width: `${((currentQIndex + 1) / module.questions.length) * 100}%`,
+                backgroundColor: getProgressColor(((currentQIndex + 1) / module.questions.length) * 100)
+              }}
+            ></div>
           </div>
         </div>
 
@@ -1202,7 +1221,10 @@ function App() {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Step {quoteStep} of 4</span>
           </div>
           <div className="w-full bg-slate-100 h-1.5 rounded-full">
-            <div className="progress-gradient-fill h-full rounded-full transition-all" style={{ width: `${(quoteStep / 4) * 100}%` }}></div>
+            <div
+              className="progress-fill h-full rounded-full transition-all"
+              style={{ width: `${(quoteStep / 4) * 100}%`, backgroundColor: getProgressColor((quoteStep / 4) * 100) }}
+            ></div>
           </div>
         </div>
 
