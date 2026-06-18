@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased - 2026-06-18
+
+Prompt context:
+- Refine the "Fortress" score dashboard CTA logic with a Quick Win Simulator pattern that feels useful, low-pressure, and conversion-friendly.
+
+Changes:
+- Replaced the rejected locked-blueprint teaser with a Quick Win Simulator card below the main score area.
+- Added inactive column-card improvement slots for Health Shield, Lifestyle Fund, and Life Protection.
+- Moved the Quick Win Simulator below Layer Analysis and styled the increase badge with white text on a dark green background.
+- Updated dynamic CTA button copy to use quick-win language for protection, safety-net, family-backup, and default momentum branches.
+- Added time expectation microcopy inside the dark CTA card: "Takes ~30 seconds."
+- Matched the dashboard CTA animation behavior to the "See My Results" shine treatment while preserving the green palette.
+- Improved final journey celebration visibility with a translucent wrapper and replaced the fortress loading shield with the rotating logo treatment.
+- Removed the authority badge below the CTA card.
+- Preserved the docked CTA handoff behavior while passing clicked CTA context into the quote transition and quote form Step 1.
+- Added `quoteIntent` to the lead submission payload so downstream handling can see which CTA path the user selected.
+- Replaced the quote Step 1 birthdate input with a mobile-first age stepper that supports press-and-hold adjustment.
+- Updated lead payloads and notification emails to use `age` plus computed `birthYear`, rendered as "Age (Year)".
+
 ## 1.5.8 - 2026-06-17
 
 Prompt context:

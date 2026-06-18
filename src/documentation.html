@@ -226,7 +226,7 @@ Set expectations before collecting personal details.
 Capture user details needed for a personalized estimate follow-up.
 
 ### Main UI sections by step
-- Step 1: Basic details (birthdate, gender)
+- Step 1: Basic details (age, gender)
 - Step 2: Primary focus selection
 - Step 3: Budget/comfort range selection
 - Step 4: Contact details + consent
@@ -237,7 +237,7 @@ Capture user details needed for a personalized estimate follow-up.
 - Request My Free Review submits form flow and opens confirmation
 
 ### Validation highlights
-- Step 1 requires date of birth and gender
+- Step 1 requires age and gender
 - Step 2 requires goal selection
 - Step 3 requires budget selection
 - Step 4 requires name, phone, and consent checkbox
@@ -282,7 +282,7 @@ Confirm request status and summarize key choices.
 | Module: The Shield | Current protection cover | Multi-select options | Yes to proceed | Identify existing protection layers | Contributes to protection score and threat logic |
 | Module: The Shield | Dependents | Multi-select options | Yes to proceed | Determine income dependency risk | Drives family-related CTA/threat logic |
 | Module: Goals & Direction | Top priorities | Multi-select with max 2 | Yes to proceed | Identify user intent | Contributes to goals score and CTA logic |
-| Quote Step 1 | Birthdate | Date input | Yes | Age-related estimate context | Included in quote data payload |
+| Quote Step 1 | Age | Big button stepper | Yes | Age-related estimate context | Included in quote data payload with computed birth year |
 | Quote Step 1 | Gender | Button select | Yes | Estimate context | Included in quote data payload |
 | Quote Step 2 | Primary focus | Option card select | Yes | Define recommendation focus | Included in quote data payload |
 | Quote Step 3 | Starting level budget | Option card select | Yes | Match options to comfort range | Included in quote data payload |

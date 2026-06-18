@@ -354,7 +354,7 @@ const WelcomeMapGraphic = () => (
   </div>
 );
 
-const QuickReviewIntroScreen = ({ onPrimary, onSecondary }) => (
+const QuickReviewIntroScreen = ({ onPrimary, onSecondary, quoteIntent }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -382,7 +382,7 @@ const QuickReviewIntroScreen = ({ onPrimary, onSecondary }) => (
       </div>
 
       <div className="mt-7 text-center">
-        <h2 className="text-[2rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.25rem]">Get Started</h2>
+        <h2 className="text-[2rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.25rem]">{quoteIntent?.wizardHeadline || 'Get Started'}</h2>
         <p className="mx-auto mt-4 max-w-[24rem] text-sm leading-7 text-slate-600 sm:text-[15px]">
           To build a realistic starting point, we&apos;ll ask a few quick details. This is not an application and there is zero commitment required.
         </p>
@@ -443,6 +443,36 @@ const ScoreRing = ({ score, colorClass }) => {
   );
 };
 
+const QuickWinSimulatorCard = () => (
+  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-100/70 p-5 text-center shadow-sm">
+    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-700/40 bg-emerald-900 text-white shadow-sm">
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M4 17l6-6 4 4 6-8" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M15 7h5v5" />
+      </svg>
+    </div>
+    <div className="mx-auto mb-3 w-fit rounded-full border border-emerald-700/40 bg-emerald-900 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
+      +20 pts
+    </div>
+    <h3 className="text-sm font-extrabold tracking-tight text-slate-800">Let&apos;s see how to boost your rating.</h3>
+    <p className="mx-auto mt-2 max-w-[18rem] text-xs font-medium leading-relaxed text-slate-500">
+      Answer 4 quick questions to simulate your easiest &apos;quick wins&apos; for a stronger profile.
+    </p>
+    <div className="mt-5 grid grid-cols-3 gap-2.5" aria-label="Potential improvement slots">
+      {[
+        { icon: '🛡️', label: 'Health Shield' },
+        { icon: '🌴', label: 'Lifestyle Fund' },
+        { icon: '🛡️', label: 'Life Protection' }
+      ].map((slot) => (
+        <div key={slot.label} className="flex min-h-[5.25rem] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/60 px-2 py-3 text-center text-[11px] font-bold leading-tight text-slate-500 opacity-60">
+          <span className="text-lg grayscale">{slot.icon}</span>
+          <span>{slot.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const AnalyzingScreen = ({ onComplete }) => {
   const [text, setText] = useState('Checking your cash flow layer...');
 
@@ -461,9 +491,10 @@ const AnalyzingScreen = ({ onComplete }) => {
   return (
     <div className="h-full min-h-[100dvh] md:min-h-full flex flex-col justify-center items-center p-8 bg-slate-800 text-white text-center animate-fade-in relative overflow-hidden">
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
-      <div className="relative z-10 w-24 h-24 mb-8">
-        <div className="absolute inset-0 border-4 border-slate-600 rounded-full border-t-emerald-400 animate-spin"></div>
-        <div className="absolute inset-0 flex items-center justify-center text-4xl">🛡️</div>
+      <div className="relative z-10 mb-8">
+        <div className="welcome-logo">
+          <Compass className="h-10 w-10 text-white" strokeWidth={2.2} />
+        </div>
       </div>
       <h2 className="text-2xl font-bold mb-3 tracking-tight">Building Your Fortress</h2>
       <p className="text-slate-300 font-medium animate-pulse-soft">{text}</p>
@@ -473,31 +504,58 @@ const AnalyzingScreen = ({ onComplete }) => {
 
 const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebrationActive }) => {
   const [showBreakdown, setShowBreakdown] = useState(false);
+  const [isNaturalCtaVisible, setIsNaturalCtaVisible] = useState(false);
+  const dashboardScrollRef = useRef(null);
+  const naturalCtaRef = useRef(null);
+
+  useEffect(() => {
+    const scrollElement = dashboardScrollRef.current;
+    const ctaElement = naturalCtaRef.current;
+
+    if (!scrollElement || !ctaElement || typeof IntersectionObserver === 'undefined') {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsNaturalCtaVisible(entry.isIntersecting);
+      },
+      {
+        root: scrollElement,
+        threshold: 0.22
+      }
+    );
+
+    observer.observe(ctaElement);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="app-scroll bg-slate-50 h-full hide-scrollbar relative">
+    <div className="bg-slate-50 h-full relative overflow-hidden">
       <CelebrationOverlay active={celebrationActive} src={LOTTIE_URLS.fortressReveal} className="bg-white/30 backdrop-blur-[2px]" />
-      <div className="bg-white px-6 pt-12 pb-10 rounded-b-[2.5rem] shadow-sm border-b border-slate-100 text-center relative z-10 shrink-0 animate-slide-up">
-        {/* Share & Save icon buttons — relocated from bottom row */}
-        <div className="absolute top-4 right-4 flex gap-2 z-20">
-          <button
-            aria-label="Share link"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-slate-100 shadow-sm text-slate-500 hover:text-indigo-600 hover:border-indigo-100 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-          </button>
-          <button
-            aria-label="Save image"
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-slate-100 shadow-sm text-slate-500 hover:text-emerald-600 hover:border-emerald-100 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </button>
-        </div>
-        <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Your Financial Fortress</h2>
+      <div ref={dashboardScrollRef} className="app-scroll h-full hide-scrollbar relative">
+        <div className="bg-white px-6 pt-12 pb-10 rounded-b-[2.5rem] shadow-sm border-b border-slate-100 text-center relative z-10 shrink-0 animate-slide-up">
+          {/* Share & Save icon buttons — relocated from bottom row */}
+          <div className="absolute top-4 right-4 flex gap-2 z-20">
+            <button
+              aria-label="Share link"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-slate-100 shadow-sm text-slate-500 hover:text-indigo-600 hover:border-indigo-100 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            </button>
+            <button
+              aria-label="Save image"
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-white/80 backdrop-blur border border-slate-100 shadow-sm text-slate-500 hover:text-emerald-600 hover:border-emerald-100 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+            </button>
+          </div>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Your Financial Fortress</h2>
 
         <div className="relative mx-auto w-40 h-40 mb-6">
           <div className="absolute inset-0 flex items-center justify-center">
@@ -551,7 +609,7 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
         </div>
       </div>
 
-      <div className="px-5 mt-6 mb-8 pb-[calc(env(safe-area-inset-bottom)+2.5rem)] space-y-4">
+        <div className="px-5 mt-6 mb-8 pb-[calc(env(safe-area-inset-bottom)+7.5rem)] space-y-4">
         <h3 className="font-bold text-slate-800 px-1 text-sm">Layer Analysis</h3>
 
         {data.threats.map((threat, idx) => (
@@ -573,17 +631,20 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
           </div>
         ))}
 
-          <div className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
+        <QuickWinSimulatorCard />
+
+          <div ref={naturalCtaRef} className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10">
             <span className="text-3xl mb-3 block">{data.cta.icon}</span>
             <h3 className="text-lg font-bold mb-2 tracking-tight">{data.cta.headline}</h3>
             <p className="text-sm text-slate-300 mb-6 leading-relaxed font-medium">{data.cta.hook}</p>
+            <p className="mb-3 text-center text-xs font-semibold text-slate-300">Takes ~30 seconds.</p>
 
             <Button
-              onClick={onTransitionToQuote}
+              onClick={() => onTransitionToQuote(data.cta)}
               variant="emerald"
-              className="mb-3 animate-pulse-soft shadow-[0_12px_32px_rgba(16,185,129,0.3)]"
+              className="cta-quick-wins-motion mb-3 border border-emerald-200/70 text-white"
             >
                 {data.cta.buttonText}
             </Button>
@@ -597,8 +658,17 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
             <p className="text-[10px] text-slate-400 text-center font-medium leading-relaxed">No payment. No commitment. Just a personalized starting estimate.</p>
           </div>
         </div>
-
       </div>
+      </div>
+      {!isNaturalCtaVisible && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent animate-slide-up">
+          <div className="pointer-events-auto">
+            <Button onClick={() => onTransitionToQuote(data.cta)} variant="emerald" className="cta-quick-wins-motion border border-emerald-200/70 text-white">
+              {data.cta.buttonText}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -621,7 +691,7 @@ function App() {
   const [quoteStep, setQuoteStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [quoteData, setQuoteData] = useState({
-    dob: '',
+    age: 30,
     gender: '',
     goal: '',
     budget: '',
@@ -630,6 +700,7 @@ function App() {
     email: '',
     consent: false
   });
+  const [quoteIntent, setQuoteIntent] = useState(null);
 
   const [completionFx, setCompletionFx] = useState({ active: false, moduleId: null, final: false });
   const [pendingHubScroll, setPendingHubScroll] = useState(false);
@@ -644,10 +715,15 @@ function App() {
   const hubScrollRef = useRef(null);
   const resultsCtaRef = useRef(null);
   const timersRef = useRef([]);
+  const ageHoldTimerRef = useRef(null);
 
   const clearTimers = () => {
     timersRef.current.forEach((timerId) => clearTimeout(timerId));
     timersRef.current = [];
+    if (ageHoldTimerRef.current) {
+      clearInterval(ageHoldTimerRef.current);
+      ageHoldTimerRef.current = null;
+    }
   };
 
   const schedule = (callback, delay) => {
@@ -658,6 +734,19 @@ function App() {
 
     timersRef.current.push(timerId);
     return timerId;
+  };
+
+  const handleTransitionToQuote = (cta) => {
+    setQuoteIntent(
+      cta
+        ? {
+            headline: cta.headline,
+            buttonText: cta.buttonText,
+            wizardHeadline: cta.wizardHeadline
+          }
+        : null
+    );
+    setScreen('quote_transition');
   };
 
   useEffect(() => () => clearTimers(), []);
@@ -712,7 +801,7 @@ function App() {
     setQuoteStep(1);
     setIsSubmitting(false);
     setQuoteData({
-      dob: '',
+      age: 30,
       gender: '',
       goal: '',
       budget: '',
@@ -721,6 +810,7 @@ function App() {
       email: '',
       consent: false
     });
+    setQuoteIntent(null);
     setCompletionFx({ active: false, moduleId: null, final: false });
     setPendingHubScroll(false);
     setAnalyzeButtonReady(false);
@@ -896,28 +986,32 @@ function App() {
       cta = {
         headline: 'You have people counting on you.',
         hook: 'You work hard for your family. Checking out a backup plan helps ensure they are supported no matter what.',
-        buttonText: 'Check My Family Backup Plan',
+        buttonText: 'Check My Family Quick Wins',
+        wizardHeadline: "Let's check your family quick wins.",
         icon: '🛡️'
       };
     } else if (protCount === 0) {
       cta = {
         headline: 'Build your first safety shield.',
         hook: "Your savings help with today, but a protection plan shields your tomorrow. Let's find beginner-friendly options.",
-        buttonText: 'Show Me Beginner Options',
+        buttonText: 'Find My Foundation Quick Wins',
+        wizardHeadline: "Let's find your foundation quick wins.",
         icon: '🌱'
       };
     } else if (answers.priorities.includes('invest') && score < 60) {
       cta = {
         headline: 'Protect before you grow.',
         hook: 'Your investment goals are safer when your basic protection layer is solid. Let\'s review your balance.',
-        buttonText: 'Review My Safety Net',
+        buttonText: 'Find My Protection Quick Wins',
+        wizardHeadline: "Let's find your protection quick wins.",
         icon: '📈'
       };
     } else {
       cta = {
         headline: 'Keep building your momentum.',
         hook: 'Let\'s review a personalized strategy to align your current setup with your future goals.',
-        buttonText: 'Explore My Options',
+        buttonText: 'Find My Easiest Quick Wins',
+        wizardHeadline: "Let's find your easiest quick wins.",
         icon: '🧭'
       };
     }
@@ -957,7 +1051,7 @@ function App() {
 
     return (
       <div className="h-full flex flex-col bg-slate-50 relative overflow-hidden">
-        <CelebrationOverlay active={isFinalCelebrationActive} src={LOTTIE_URLS.roadmapCelebrate} className="bg-slate-950/20 backdrop-blur-[1px]" />
+        <CelebrationOverlay active={isFinalCelebrationActive} src={LOTTIE_URLS.roadmapCelebrate} className="bg-white/55 backdrop-blur-[2px] [&>div]:m-6 [&>div]:rounded-[2rem] [&>div]:bg-white/45 [&>div]:shadow-2xl [&>div]:ring-1 [&>div]:ring-white/70" />
         <div className="bg-white px-6 pt-10 pb-6 rounded-b-[2rem] shadow-sm relative z-10 border-b border-slate-100 animate-slide-up">
           <h2 className="text-xl font-extrabold text-slate-800 mb-5">Your Profile Journey</h2>
           <div className="mb-2 flex justify-between items-end">
@@ -1201,17 +1295,40 @@ function App() {
   };
 
   const renderQuoteTransition = () => (
-    <QuickReviewIntroScreen onPrimary={() => setScreen('quote_form')} onSecondary={() => setScreen('dashboard')} />
+    <QuickReviewIntroScreen onPrimary={() => setScreen('quote_form')} onSecondary={() => setScreen('dashboard')} quoteIntent={quoteIntent} />
   );
 
   const renderQuoteForm = () => {
     const updateQuote = (field, value) => setQuoteData((prev) => ({ ...prev, [field]: value }));
+    const clampAge = (value) => Math.max(18, Math.min(99, Number(value) || 30));
+    const adjustAge = (delta) =>
+      setQuoteData((prev) => ({
+        ...prev,
+        age: clampAge((prev.age ?? 30) + delta)
+      }));
+    const incrementAge = () => adjustAge(1);
+    const decrementAge = () => adjustAge(-1);
+    const stopAgeHold = () => {
+      if (ageHoldTimerRef.current) {
+        clearInterval(ageHoldTimerRef.current);
+        ageHoldTimerRef.current = null;
+      }
+    };
+    const startAgeHold = (direction) => {
+      stopAgeHold();
+      const updateAge = direction === 'increment' ? incrementAge : decrementAge;
+      updateAge();
+      ageHoldTimerRef.current = window.setInterval(updateAge, 120);
+    };
+
     const submitLead = async () => {
       if (isSubmitting) {
         return;
       }
 
       setIsSubmitting(true);
+      const normalizedAge = clampAge(quoteData.age);
+      const birthYear = new Date().getFullYear() - normalizedAge;
 
       const payload = {
         submittedAt: new Date().toISOString(),
@@ -1219,7 +1336,12 @@ function App() {
         completedModules,
         activeModuleId,
         answers,
-        quoteData,
+        quoteData: {
+          ...quoteData,
+          age: normalizedAge,
+          birthYear
+        },
+        quoteIntent,
         scoreData: calculateFortressData,
         moduleTimings
       };
@@ -1268,7 +1390,7 @@ function App() {
 
     const canProceed = () => {
       if (quoteStep === 1) {
-        return quoteData.dob && quoteData.gender;
+        return quoteData.age && quoteData.gender;
       }
 
       if (quoteStep === 2) {
@@ -1306,7 +1428,7 @@ function App() {
         <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 hide-scrollbar">
           {quoteStep === 1 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-6">Basic Details</h2>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-6">{quoteIntent?.wizardHeadline || 'Basic Details'}</h2>
               <div className="bg-slate-100/80 p-3 rounded-xl mb-8 flex gap-3 items-start border border-slate-200/60">
                 <svg className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1317,13 +1439,36 @@ function App() {
               </div>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Birthdate</label>
-                  <input
-                    type="date"
-                    value={quoteData.dob}
-                    onChange={(e) => updateQuote('dob', e.target.value)}
-                    className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-slate-800 focus:outline-none font-medium text-slate-700 shadow-sm"
-                  />
+                  <label className="block text-sm font-bold text-slate-700 mb-3 text-center">Age</label>
+                  <div className="flex items-center justify-center gap-4 rounded-[1.5rem] border-2 border-slate-100 bg-white p-4 shadow-sm">
+                    <button
+                      type="button"
+                      aria-label="Decrease age"
+                      onPointerDown={() => startAgeHold('decrement')}
+                      onPointerUp={stopAgeHold}
+                      onPointerLeave={stopAgeHold}
+                      onPointerCancel={stopAgeHold}
+                      className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl font-black text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                    >
+                      −
+                    </button>
+                    <div className="min-w-[7rem] text-center">
+                      <div className="text-5xl font-black tracking-tight text-slate-900">{quoteData.age}</div>
+                      <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">years old</div>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Increase age"
+                      onPointerDown={() => startAgeHold('increment')}
+                      onPointerUp={stopAgeHold}
+                      onPointerLeave={stopAgeHold}
+                      onPointerCancel={stopAgeHold}
+                      className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800 text-3xl font-black text-white shadow-md transition hover:bg-slate-900 active:scale-95"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="mt-2 text-center text-[11px] font-medium text-slate-400">Hold a button to adjust faster.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">Gender</label>
@@ -1608,7 +1753,7 @@ function App() {
         {screen === 'dashboard' && (
           <DashboardScreen
             data={calculateFortressData}
-            onTransitionToQuote={() => setScreen('quote_transition')}
+            onTransitionToQuote={handleTransitionToQuote}
             onResetJourney={restartJourney}
             celebrationActive={dashboardCelebration}
           />
