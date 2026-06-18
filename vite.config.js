@@ -4,8 +4,12 @@ import { readFileSync } from 'node:fs';
 
 const { version } = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
-const normalizeBasePath = (value = '/') => {
-  if (!value || value === '/') {
+const normalizeBasePath = (value) => {
+  if (!value || value.trim() === '.') {
+    return './';
+  }
+
+  if (value === '/') {
     return '/';
   }
 

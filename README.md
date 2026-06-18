@@ -105,12 +105,15 @@ Run the app through Cloudflare Pages local development when testing the Function
 
 ### Subpath deploy
 
-If the site will be served from a subpath such as `/free-assess/`, set the `VITE_BASE_PATH` build environment variable.
+By default, the app emits relative asset URLs so the same build works from the domain root or a simple subpath.
+
+If you need absolute asset URLs for a specific mount point, set the `VITE_BASE_PATH` build environment variable.
 
 - Example local build: `VITE_BASE_PATH=/free-assess/ npm run build`
 - Example Cloudflare Pages environment variable: `VITE_BASE_PATH=/free-assess/`
+- For a domain-root absolute build, use `VITE_BASE_PATH=/`
 
-The Vite config normalizes this value so both `/free-assess` and `/free-assess/` resolve correctly.
+The Vite config normalizes this value so both `/free-assess` and `/free-assess/` resolve correctly. If production reports that a module script was served as `text/html`, check that the deployed HTML is requesting the correct asset path and clear any stale Cloudflare cache.
 
 ### Self-hosted runtime assets
 
