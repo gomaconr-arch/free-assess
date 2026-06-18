@@ -641,6 +641,7 @@ function App() {
   const [playedCheckAnimation, setPlayedCheckAnimation] = useState({});
 
   const nextModuleRef = useRef(null);
+  const hubScrollRef = useRef(null);
   const resultsCtaRef = useRef(null);
   const timersRef = useRef([]);
 
@@ -677,10 +678,13 @@ function App() {
   }, [screen, pendingHubScroll, completedModules]);
 
   useEffect(() => {
-    if (screen === 'hub' && analyzeButtonReady && resultsCtaRef.current) {
+    if (screen === 'hub' && analyzeButtonReady && hubScrollRef.current) {
       const timerId = window.setTimeout(() => {
-        if (resultsCtaRef.current) {
-          resultsCtaRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (hubScrollRef.current) {
+          hubScrollRef.current.scrollTo({
+            top: hubScrollRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
         }
       }, 250);
 
@@ -965,7 +969,7 @@ function App() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar pb-32">
+        <div ref={hubScrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 hide-scrollbar pb-36">
           {showMiniInsight && (
             <div className="bg-indigo-50 border border-indigo-100 rounded-[1.5rem] p-5 flex gap-4 items-start animate-fade-in shadow-sm">
               <span className="text-indigo-500 text-2xl shrink-0">💡</span>
@@ -1059,7 +1063,7 @@ function App() {
           })}
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 z-30 p-6 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent">
           {completedModules.length === JOURNEY_MODULES.length && analyzeButtonReady && (
             <div ref={resultsCtaRef}>
               <Button onClick={() => setScreen('analyzing')} className="cta-results-motion border border-sky-200/70 text-white">
