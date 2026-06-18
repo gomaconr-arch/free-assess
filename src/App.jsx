@@ -282,6 +282,78 @@ const SecondaryActionButton = ({ children, onClick }) => (
   </motion.button>
 );
 
+const WelcomeMapGraphic = () => (
+  <div className="welcome-map-graphic" aria-hidden="true">
+    <svg viewBox="0 0 360 560" className="h-full w-full" fill="none">
+      <defs>
+        <linearGradient id="routeFade" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0%" stopColor="var(--brand-accent)" stopOpacity="0.5" />
+          <stop offset="56%" stopColor="var(--brand-primary-soft)" stopOpacity="0.34" />
+          <stop offset="100%" stopColor="var(--brand-primary-soft)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <g className="map-angled-grid">
+        {[
+          'M-42 526L84 400L210 526L398 338',
+          'M-28 430L92 310L212 430L388 254',
+          'M-18 334L90 226L198 334L368 164',
+          'M28 584L154 458L280 584',
+          'M118 568L244 442L392 590',
+          'M-34 214L74 106L182 214L296 100'
+        ].map((line) => (
+          <path key={line} d={line} />
+        ))}
+      </g>
+      {[
+        { d: 'M24 560L88 496L142 442L206 378L276 308L340 244', delay: '0s', duration: '7.2s' },
+        { d: 'M-18 410L56 336L128 408L202 334L286 250L378 158', delay: '1.6s', duration: '7.8s' },
+        { d: 'M378 458L312 392L248 328L178 258L108 188L36 116', delay: '3.2s', duration: '7.1s' },
+        { d: 'M326 560L278 512L326 464L266 404L202 340L252 290L304 238', delay: '4.8s', duration: '8s' },
+        { d: 'M116 560L172 504L118 450L180 388L236 332L306 262L374 194', delay: '6.4s', duration: '7.5s' }
+      ].map((route) => (
+        <path
+          key={route.d}
+          className="map-angled-route"
+          d={route.d}
+          pathLength="1"
+          style={{ '--route-delay': route.delay, '--route-duration': route.duration }}
+        />
+      ))}
+      {[
+        { x: 54, y: 530, delay: '0.52s' },
+        { x: 114, y: 470, delay: '0.92s' },
+        { x: 174, y: 410, delay: '1.32s' },
+        { x: 242, y: 342, delay: '1.72s' },
+        { x: 22, y: 370, delay: '2.5s' },
+        { x: 92, y: 372, delay: '2.9s' },
+        { x: 164, y: 372, delay: '3.3s' },
+        { x: 244, y: 292, delay: '3.7s' },
+        { x: 346, y: 426, delay: '4.52s' },
+        { x: 280, y: 360, delay: '4.92s' },
+        { x: 214, y: 294, delay: '5.32s' },
+        { x: 144, y: 224, delay: '5.72s' },
+        { x: 302, y: 536, delay: '6.5s' },
+        { x: 302, y: 488, delay: '6.9s' },
+        { x: 266, y: 404, delay: '7.3s' },
+        { x: 226, y: 316, delay: '7.7s' },
+        { x: 144, y: 532, delay: '8.52s' },
+        { x: 146, y: 422, delay: '8.92s' },
+        { x: 208, y: 360, delay: '9.32s' },
+        { x: 272, y: 296, delay: '9.72s' }
+      ].map((step) => (
+        <circle
+          key={`${step.x}-${step.y}-${step.delay}`}
+          className="map-milestone-dot"
+          cx={step.x}
+          cy={step.y}
+          r="5"
+          style={{ '--dot-delay': step.delay }}
+        />
+      ))}
+    </svg>
+  </div>
+);
+
 const QuickReviewIntroScreen = ({ onPrimary, onSecondary }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
@@ -850,28 +922,27 @@ function App() {
   }, [answers]);
 
   const renderWelcome = () => (
-    <div className="h-full flex flex-col justify-center items-center p-8 bg-white text-center animate-fade-in relative z-10">
-      <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center shadow-sm mb-8 border border-slate-100">
-        <Compass className="h-10 w-10 text-slate-700" strokeWidth={2.2} />
+    <div className="screen-mesh h-full flex flex-col justify-center items-center p-8 text-center animate-fade-in relative z-10 overflow-hidden">
+      <WelcomeMapGraphic />
+      <div className="welcome-logo mb-8">
+        <Compass className="h-10 w-10 text-white" strokeWidth={2.2} />
       </div>
       <h1 className="text-3xl font-extrabold text-slate-800 mb-4 tracking-tight leading-tight">
-        My Financial
-        <br />
-        Foundation Map
+        Map My Future
       </h1>
       <p className="text-slate-500 mb-10 leading-relaxed max-w-xs mx-auto font-medium">
-        Welcome to your personal roadmap. Let&apos;s check your current safety net and build your profile step by step.
+        Let&apos;s look at where you stand today. Tap through a few quick steps to see how prepared you are for tomorrow.
       </p>
       <div className="w-full mt-auto mb-8 space-y-4">
         <Button onClick={() => setScreen('hub')}>Start My Journey</Button>
-        <p className="text-xs text-slate-400 font-bold uppercase tracking-wider flex items-center justify-center gap-2">
+        <p className="text-xs text-slate-600 font-bold uppercase tracking-wider flex items-center justify-center gap-2">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Takes about 3 minutes
         </p>
       </div>
-      <p className="text-[10px] text-slate-300 font-medium tracking-wide">v{__APP_VERSION__}</p>
+      <p className="text-[10px] text-slate-500 font-medium tracking-wide">v{__APP_VERSION__}</p>
     </div>
   );
 

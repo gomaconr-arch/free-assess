@@ -66,6 +66,38 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /*
+    Brand theme tokens.
+    Update these values first when changing brand colors, typography, or the welcome artwork.
+    Tailwind aliases for these tokens are also available in tailwind.config.js as brand-* colors.
+  */
+  --font-brand: 'Figtree', sans-serif;
+
+  --brand-ink: #0f172a;
+  --brand-surface: #ffffff;
+  --brand-page-start: #e2e8f0;
+  --brand-page-mid: #f8fafc;
+  --brand-page-end: #e2e8f0;
+
+  --brand-primary: #0f766e;
+  --brand-primary-rgb: 15 118 110;
+  --brand-primary-soft: #14b8a6;
+  --brand-primary-soft-rgb: 20 184 166;
+  --brand-accent: #0ea5e9;
+  --brand-accent-rgb: 14 165 233;
+  --brand-accent-soft: #bae6fd;
+
+  --welcome-bg: #eaf8f6;
+  --welcome-mesh-a: 125 211 252;
+  --welcome-mesh-b: 167 243 208;
+  --welcome-mesh-c: 110 231 183;
+  --welcome-mesh-d: 186 230 253;
+  --welcome-gradient-start: #effcff;
+  --welcome-gradient-mid: #f5fff8;
+  --welcome-gradient-end: #eef9ff;
+}
+
 html,
 body,
 #root {
@@ -81,8 +113,8 @@ body,
 }
 
 body {
-  font-family: 'Figtree', sans-serif;
-  background: linear-gradient(180deg, #e2e8f0 0%, #f8fafc 48%, #e2e8f0 100%);
+  font-family: var(--font-brand);
+  background: linear-gradient(180deg, var(--brand-page-start) 0%, var(--brand-page-mid) 48%, var(--brand-page-end) 100%);
   margin: 0;
   padding: 0;
   display: flex;
@@ -95,6 +127,92 @@ body {
 .app-shell {
   height: 100dvh;
   min-height: 100dvh;
+}
+
+.screen-mesh {
+  background: var(--welcome-bg);
+  isolation: isolate;
+}
+
+.screen-mesh::before {
+  content: '';
+  position: absolute;
+  inset: -22%;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 14% 18%, rgb(var(--welcome-mesh-a) / 48%) 0 17%, transparent 36%),
+    radial-gradient(circle at 82% 14%, rgb(var(--welcome-mesh-b) / 52%) 0 18%, transparent 38%),
+    radial-gradient(circle at 64% 76%, rgb(var(--welcome-mesh-c) / 45%) 0 18%, transparent 37%),
+    radial-gradient(circle at 18% 84%, rgb(var(--welcome-mesh-d) / 58%) 0 20%, transparent 42%),
+    linear-gradient(135deg, var(--welcome-gradient-start) 0%, var(--welcome-gradient-mid) 45%, var(--welcome-gradient-end) 100%);
+  background-size: 115% 115%, 120% 120%, 125% 125%, 118% 118%, 100% 100%;
+  filter: blur(18px) saturate(112%);
+  transform: translate3d(0, 0, 0) scale(1.03);
+  animation: meshDrift 34s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.screen-mesh > :not(.welcome-map-graphic) {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-map-graphic {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.map-angled-grid {
+  animation: mapGridDrift 24s ease-in-out infinite alternate;
+}
+
+.map-angled-grid path {
+  stroke: rgb(var(--brand-primary-rgb) / 8%);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: mapGridPulse 7.5s ease-in-out infinite;
+}
+
+.map-angled-route {
+  stroke: url(#routeFade);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 10px 20px rgb(var(--brand-accent-rgb) / 10%));
+  opacity: 0;
+  animation: mapRouteWander var(--route-duration, 7s) ease-in-out infinite;
+  animation-delay: var(--route-delay, 0s);
+}
+
+.map-milestone-dot {
+  fill: rgb(var(--brand-primary-rgb) / 62%);
+  opacity: 0;
+  stroke: rgb(255 255 255 / 74%);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 5px 12px rgb(var(--brand-primary-rgb) / 18%));
+  animation: mapMilestoneDot 11.2s ease-in-out infinite;
+  animation-delay: var(--dot-delay, 0s);
+}
+
+.welcome-logo {
+  display: flex;
+  width: 6rem;
+  height: 6rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 9999px;
+  background: linear-gradient(145deg, #020617 0%, #0f172a 48%, #0f766e 100%);
+  box-shadow: 0 22px 45px rgb(15 23 42 / 20%), inset 0 1px 0 rgb(255 255 255 / 16%);
+  animation: logoRotateClockwise 18s linear infinite;
 }
 
 .app-scroll {
@@ -167,6 +285,109 @@ body {
   }
 }
 
+@keyframes meshDrift {
+  0% {
+    background-position: 0% 0%, 100% 0%, 72% 100%, 0% 88%, 50% 50%;
+    transform: translate3d(-1.5%, -1%, 0) scale(1.03);
+  }
+
+  50% {
+    background-position: 12% 8%, 86% 12%, 62% 88%, 10% 76%, 50% 50%;
+    transform: translate3d(1%, 1.5%, 0) scale(1.06);
+  }
+
+  100% {
+    background-position: 6% 16%, 94% 22%, 78% 82%, 14% 96%, 50% 50%;
+    transform: translate3d(1.8%, -0.5%, 0) scale(1.04);
+  }
+}
+
+@keyframes mapRouteWander {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+
+  14% {
+    opacity: 0.7;
+  }
+
+  54% {
+    stroke-dashoffset: 0.18;
+    opacity: 0.52;
+  }
+
+  76% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes mapMilestoneDot {
+  0%,
+  2% {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+
+  5% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+
+  18% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+
+  38% {
+    opacity: 0.18;
+    transform: scale(0.92);
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes mapGridDrift {
+  0% {
+    transform: translate3d(-8px, 6px, 0);
+  }
+
+  50% {
+    transform: translate3d(8px, -10px, 0);
+  }
+
+  100% {
+    transform: translate3d(14px, 8px, 0);
+  }
+}
+
+@keyframes mapGridPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes logoRotateClockwise {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .animate-slide-up {
   animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -232,5 +453,25 @@ body {
     height: 100dvh;
     min-height: 100dvh;
     max-height: 100dvh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-angled-grid,
+  .map-angled-grid path,
+  .map-milestone-dot,
+  .map-angled-route,
+  .welcome-logo,
+  .screen-mesh::before {
+    animation: none;
+  }
+
+  .map-angled-route {
+    opacity: 0.38;
+    stroke-dashoffset: 0.18;
+  }
+
+  .map-milestone-dot {
+    opacity: 0;
   }
 }
