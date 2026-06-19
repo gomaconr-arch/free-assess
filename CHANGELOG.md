@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5.11 - 2026-06-19
+
+Prompt context:
+- Remove the Quick Win Simulator friction from the fortress page and improve the final roadmap summary with calculation details and private sharing.
+
+Changes:
+- Removed `QuickWinSimulatorCard` from the fortress/gap reveal page.
+- Restored the "How it was calculated" breakdown card below the final roadmap summary.
+- Added an animated question icon above the "What happens next?" section.
+- Added a mobile-first "Share the Tool" copy-to-clipboard button on the final success screen.
+- Added copied-state feedback that switches the share button to "Link Copied! ✅" for 2 seconds.
+- Bumped project version for the final-screen sharing and roadmap summary refinements.
+
 ## 1.5.10 - 2026-06-19
 
 Prompt context:

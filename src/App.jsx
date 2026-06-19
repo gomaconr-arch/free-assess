@@ -347,33 +347,20 @@ const CalibratingScorePlaceholder = () => (
   </div>
 );
 
-const QuickWinSimulatorCard = () => (
-  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-100/70 p-5 text-center shadow-sm">
-    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-700/40 bg-emerald-900 text-white shadow-sm">
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M4 17l6-6 4 4 6-8" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M15 7h5v5" />
-      </svg>
-    </div>
-    <div className="mx-auto mb-3 w-fit rounded-full border border-emerald-700/40 bg-emerald-900 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
-      +20 pts
-    </div>
-    <h3 className="text-sm font-extrabold tracking-tight text-slate-800">Let&apos;s see how to boost your rating.</h3>
-    <p className="mx-auto mt-2 max-w-[18rem] text-xs font-medium leading-relaxed text-slate-500">
-      Answer 4 quick questions to simulate your easiest &apos;quick wins&apos; for a stronger profile.
-    </p>
-    <div className="mt-5 grid grid-cols-3 gap-2.5" aria-label="Potential improvement slots">
-      {[
-        { icon: '🛡️', label: 'Health Shield' },
-        { icon: '🌴', label: 'Lifestyle Fund' },
-        { icon: '🛡️', label: 'Life Protection' }
-      ].map((slot) => (
-        <div key={slot.label} className="flex min-h-[5.25rem] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/60 px-2 py-3 text-center text-[11px] font-bold leading-tight text-slate-500 opacity-60">
-          <span className="text-lg grayscale">{slot.icon}</span>
-          <span>{slot.label}</span>
-        </div>
-      ))}
-    </div>
+const CopyIcon = ({ className = 'h-4 w-4' }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <rect x="8" y="8" width="11" height="11" rx="2" strokeWidth={2.2} />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+
+const QuestionPulseIcon = () => (
+  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-100 bg-white text-indigo-600 shadow-sm animate-pulse">
+    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M9.5 9a2.5 2.5 0 1 1 4.2 1.84c-.98.83-1.7 1.39-1.7 2.66" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 17h.01" />
+      <circle cx="12" cy="12" r="9" strokeWidth={2.2} />
+    </svg>
   </div>
 );
 
@@ -503,8 +490,6 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubm
           </div>
         ))}
 
-        <QuickWinSimulatorCard />
-
           <div ref={naturalCtaRef} className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10">
@@ -582,6 +567,7 @@ function App() {
   });
   const [quoteIntent, setQuoteIntent] = useState(null);
   const [hasSubmittedLead, setHasSubmittedLead] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const [completionFx, setCompletionFx] = useState({ active: false, moduleId: null, final: false });
   const [pendingHubScroll, setPendingHubScroll] = useState(false);
@@ -694,6 +680,7 @@ function App() {
     });
     setQuoteIntent(null);
     setHasSubmittedLead(false);
+    setIsCopied(false);
     setCompletionFx({ active: false, moduleId: null, final: false });
     setPendingHubScroll(false);
     setAnalyzeButtonReady(false);
@@ -1573,6 +1560,28 @@ function App() {
       }[id] || 'your selected range');
     const scoreData = calculateFortressData;
     const budgetText = getBudgetText(quoteData.budget);
+    const breakdownItems = [
+      { label: 'Cash Flow & Income', value: scoreData.breakdown.cashflow, max: 25 },
+      { label: 'Emergency Safety Net', value: scoreData.breakdown.emergency, max: 20 },
+      { label: 'Protection Coverage', value: scoreData.breakdown.protection, max: 30 },
+      { label: 'Goals & Direction', value: scoreData.breakdown.goals, max: 25 }
+    ];
+    const handleCopyShare = async () => {
+      const shareText =
+        "Just used this free tool to check my financial safety net. It takes 30 seconds and doesn't ask for exact income. Highly recommend checking your blind spots: https://assess.lablibre.com";
+
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setIsCopied(true);
+        const copyTimerId = window.setTimeout(() => {
+          timersRef.current = timersRef.current.filter((timerId) => timerId !== copyTimerId);
+          setIsCopied(false);
+        }, 2000);
+        timersRef.current.push(copyTimerId);
+      } catch {
+        alert('Unable to copy the share text right now. Please try again.');
+      }
+    };
 
     return (
       <div className="h-full flex flex-col bg-slate-50 overflow-y-auto hide-scrollbar relative overflow-hidden">
@@ -1621,7 +1630,31 @@ function App() {
             </div>
           </div>
 
+          <div className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-slate-100">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-5 block">How it was calculated</span>
+            <div className="space-y-3">
+              {breakdownItems.map((item) => {
+                const percent = (item.value / item.max) * 100;
+
+                return (
+                  <div key={item.label}>
+                    <div className="flex justify-between text-[11px] font-semibold text-slate-600 mb-1">
+                      <span>{item.label}</span>
+                      <span className="text-slate-400">
+                        {item.value}/{item.max}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className="progress-fill h-1.5 rounded-full" style={{ width: `${percent}%`, backgroundColor: getProgressColor(percent) }}></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="bg-slate-100/50 rounded-[1.5rem] p-6 border border-slate-200/50 text-center">
+            <QuestionPulseIcon />
             <h3 className="font-bold text-slate-800 mb-2 text-sm">What happens next?</h3>
             <p className="text-xs text-slate-500 leading-relaxed mb-0 font-medium">
               We&apos;ll send your detailed profile assessment by email and may follow up with guidance that matches your results and selected budget. Feel free to ask questions with absolutely zero commitment.
@@ -1632,6 +1665,24 @@ function App() {
             <Button onClick={() => setScreen('dashboard')} variant="primary" className="py-3.5">
               Back to My Fortress
             </Button>
+            <button
+              type="button"
+              onClick={handleCopyShare}
+              className={`w-full py-3.5 px-6 rounded-2xl border-2 font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm ${
+                isCopied
+                  ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
+                  : 'bg-white border-slate-300 text-slate-700 shadow-sm hover:border-slate-400 hover:bg-slate-50'
+              }`}
+            >
+              {isCopied ? (
+                'Link Copied! ✅'
+              ) : (
+                <>
+                  <CopyIcon />
+                  <span>Share the Tool</span>
+                </>
+              )}
+            </button>
             <Button onClick={restartJourney} variant="secondary" className="py-3.5">
               Start Over
             </Button>
