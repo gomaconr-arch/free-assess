@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.5.10 - 2026-06-19
+
+Prompt context:
+- Update Budget, Contact, and Success screen copy/icons in the calibration funnel while preserving dynamic score and budget rendering.
+
+Changes:
+- Updated the budget step headline and support copy to use "Pick Your Comfort Zone" language.
+- Added budget-step assurance microcopy: "Zero payment required. No commitment."
+- Updated the contact step headline/subtext and added an animated email/send SVG icon above the heading.
+- Updated the final reveal body copy to inject the selected budget label into the new roadmap-finalization message.
+- Added highlighted no-commitment/no-payment assurance copy on the success screen.
+- Removed now-unused contact-copy response state from the frontend success copy path.
+- Bumped project version for the funnel copy and UI icon update.
+
 ## 1.5.9 - 2026-06-19
 
 Prompt context:

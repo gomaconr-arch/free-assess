@@ -581,7 +581,6 @@ function App() {
     consent: false
   });
   const [quoteIntent, setQuoteIntent] = useState(null);
-  const [contactCopySent, setContactCopySent] = useState(false);
   const [hasSubmittedLead, setHasSubmittedLead] = useState(false);
 
   const [completionFx, setCompletionFx] = useState({ active: false, moduleId: null, final: false });
@@ -694,7 +693,6 @@ function App() {
       consent: false
     });
     setQuoteIntent(null);
-    setContactCopySent(false);
     setHasSubmittedLead(false);
     setCompletionFx({ active: false, moduleId: null, final: false });
     setPendingHubScroll(false);
@@ -1251,7 +1249,6 @@ function App() {
           throw new Error(message);
         }
 
-        setContactCopySent(Boolean(responseBody?.contactCopy?.sent));
         setHasSubmittedLead(true);
         setQuoteSuccessCelebration(true);
         setScreen('quote_teaser');
@@ -1386,9 +1383,9 @@ function App() {
 
           {quoteStep === 3 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Choose Your Starting Level</h2>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Pick Your Comfort Zone</h2>
               <p className="text-slate-500 text-sm mb-6 font-medium">
-                This helps us prepare options that match both your goals and comfort level. You can adjust this later.
+                Pick a starting point that fits naturally into your routine. Nothing is locked in, and you can always adjust as you go.
               </p>
               <div className="space-y-4">
                 {[
@@ -1482,14 +1479,24 @@ function App() {
               <p className="mt-6 text-[11px] text-slate-400 font-medium text-center leading-relaxed px-4">
                 You can adjust this later. A higher range may allow more flexibility, stronger coverage, or added savings features depending on your profile.
               </p>
+              <p className="mt-3 text-xs text-slate-400 font-medium text-center">Zero payment required. No commitment.</p>
             </div>
           )}
 
           {quoteStep === 4 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Where should we send your final score?</h2>
+              <div className="mb-5 flex justify-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600 shadow-sm animate-pulse">
+                  <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M3.75 6.75h16.5v10.5H3.75z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="m4.5 7.5 7.5 5.25 7.5-5.25" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M15.75 12.75 20.25 17.25M8.25 12.75 3.75 17.25" />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Where should we send your results?</h2>
               <p className="text-slate-500 text-sm mb-6 font-medium">
-                Your profile is calibrated. Enter your details to unlock your exact Fortress Score and beginner-friendly roadmap.
+                Your analysis is complete. Let us know where to deliver your exact score and personalized roadmap.
               </p>
               <div className="space-y-5">
                 <div>
@@ -1581,8 +1588,10 @@ function App() {
           </div>
           <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Your Fortress Score is {scoreData.score}/100</h2>
           <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-[300px] mx-auto">
-            Congratulations, {quoteData.name || 'your profile'} is calibrated. Your beginner-friendly roadmap for {budgetText}{' '}
-            {contactCopySent ? 'has been sent to your email.' : 'has been shared with our team for email follow-up.'}
+            Calibration complete! Your beginner-friendly roadmap for {budgetText} is being finalized. We will send the exact next steps directly to your email.
+          </p>
+          <p className="mt-4 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-xs font-bold leading-relaxed text-emerald-100">
+            Please note: Reviewing your options requires absolutely no commitment or payment.
           </p>
         </div>
 
