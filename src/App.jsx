@@ -1,6 +1,5 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, ClipboardCheck, Compass, ShieldCheck, Sparkles } from 'lucide-react';
+import { Compass } from 'lucide-react';
 
 const Lottie = lazy(() => import('lottie-react'));
 
@@ -225,63 +224,6 @@ const Button = ({ children, onClick, variant = 'primary', disabled = false, clas
   );
 };
 
-const QUICK_REVIEW_TRUST_CUES = [
-  { icon: ShieldCheck, label: 'Free' },
-  { icon: ClipboardCheck, label: 'Quick' },
-  { icon: Compass, label: 'Guided' }
-];
-
-const IntroIcon = () => (
-  <motion.div
-    initial={{ scale: 0.96, opacity: 0, y: 8 }}
-    animate={{ scale: 1, opacity: 1, y: 0 }}
-    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-    className="relative flex h-20 w-20 items-center justify-center rounded-[1.75rem] border border-slate-200 bg-slate-900 shadow-[0_18px_40px_rgba(15,23,42,0.16)]"
-  >
-    <div className="absolute inset-0 rounded-[1.75rem] bg-gradient-to-br from-white/10 via-transparent to-emerald-400/10" />
-    <div className="absolute -right-2 -top-2 rounded-full border border-white/70 bg-white/95 p-1.5 shadow-sm">
-      <Sparkles className="h-3.5 w-3.5 text-slate-500" strokeWidth={2.4} />
-    </div>
-    <Compass className="relative z-10 h-9 w-9 text-white" strokeWidth={2.2} />
-  </motion.div>
-);
-
-const TrustCue = ({ icon: Icon, label }) => (
-  <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/90 px-3 py-2.5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-    <Icon className="h-4 w-4 text-slate-500" strokeWidth={2.2} />
-    <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">{label}</span>
-  </div>
-);
-
-const PrimaryActionButton = ({ children, onClick }) => (
-  <motion.button
-    type="button"
-    onClick={onClick}
-    whileHover={{ y: -1, scale: 1.01 }}
-    whileTap={{ scale: 0.985 }}
-    transition={{ duration: 0.2 }}
-    className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-slate-900 px-6 py-[1.125rem] text-base font-semibold text-white shadow-[0_18px_32px_rgba(15,23,42,0.2)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 hover:bg-slate-800"
-  >
-    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100 group-hover:animate-pulse-soft" aria-hidden="true" />
-    <span className="absolute inset-x-6 top-0 h-px bg-white/20" aria-hidden="true" />
-    <span>{children}</span>
-    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={2.4} />
-  </motion.button>
-);
-
-const SecondaryActionButton = ({ children, onClick }) => (
-  <motion.button
-    type="button"
-    onClick={onClick}
-    whileHover={{ y: -1 }}
-    whileTap={{ scale: 0.99 }}
-    transition={{ duration: 0.2 }}
-    className="w-full rounded-full px-4 py-3 text-sm font-semibold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
-  >
-    {children}
-  </motion.button>
-);
-
 const WelcomeMapGraphic = () => (
   <div className="welcome-map-graphic" aria-hidden="true">
     <svg viewBox="0 0 360 560" className="h-full w-full" fill="none">
@@ -354,56 +296,6 @@ const WelcomeMapGraphic = () => (
   </div>
 );
 
-const QuickReviewIntroScreen = ({ onPrimary, onSecondary, quoteIntent }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-    className="relative flex h-full w-full items-center justify-center overflow-hidden bg-slate-50 px-4 py-5 sm:px-6"
-  >
-    <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-slate-900/[0.04] to-transparent" />
-    <div className="absolute left-[-6rem] top-10 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
-    <div className="absolute right-[-5rem] bottom-4 h-44 w-44 rounded-full bg-slate-900/5 blur-3xl" />
-
-    <motion.div
-      initial={{ opacity: 0, y: 18, scale: 0.985 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-      className="relative z-10 w-full max-w-[28rem] px-6 py-7 sm:px-8 sm:py-8"
-    >
-      <div className="flex justify-center">
-        <IntroIcon />
-      </div>
-
-      <div className="mt-6 flex items-center justify-center gap-2" aria-hidden="true">
-        <span className="h-2 w-8 rounded-full bg-slate-900" />
-        <span className="h-2 w-2 rounded-full bg-slate-200" />
-        <span className="h-2 w-2 rounded-full bg-slate-200" />
-      </div>
-
-      <div className="mt-7 text-center">
-        <h2 className="text-[2rem] font-extrabold tracking-tight text-slate-900 sm:text-[2.25rem]">{quoteIntent?.wizardHeadline || 'Get Started'}</h2>
-        <p className="mx-auto mt-4 max-w-[24rem] text-sm leading-7 text-slate-600 sm:text-[15px]">
-          To build a realistic starting point, we&apos;ll ask a few quick details. This is not an application and there is zero commitment required.
-        </p>
-      </div>
-
-      <div className="mt-7 grid gap-3 sm:grid-cols-3">
-        {QUICK_REVIEW_TRUST_CUES.map(({ icon, label }) => (
-          <TrustCue key={label} icon={icon} label={label} />
-        ))}
-      </div>
-
-      <div className="my-7 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
-
-      <div className="space-y-3">
-        <PrimaryActionButton onClick={onPrimary}>Build My Starting Plan</PrimaryActionButton>
-        <SecondaryActionButton onClick={onSecondary}>Wait, go back</SecondaryActionButton>
-      </div>
-    </motion.div>
-  </motion.div>
-);
-
 const CelebrationOverlay = ({ active, src, className = '' }) => {
   if (!active) {
     return null;
@@ -443,33 +335,32 @@ const ScoreRing = ({ score, colorClass }) => {
   );
 };
 
-const QuickWinSimulatorCard = () => (
-  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-100/70 p-5 text-center shadow-sm">
-    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-2xl border border-emerald-700/40 bg-emerald-900 text-white shadow-sm">
-      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M4 17l6-6 4 4 6-8" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M15 7h5v5" />
-      </svg>
+const CalibratingScorePlaceholder = () => (
+  <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
+    <div className="absolute inset-0 rounded-full border-[8px] border-slate-100" />
+    <div className="absolute inset-0 rounded-full border-[8px] border-transparent border-t-indigo-500 border-r-emerald-400 animate-spin" />
+    <div className="absolute inset-4 rounded-full bg-white shadow-inner blur-[1px]" />
+    <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <span className="text-4xl font-extrabold text-slate-300 tracking-tight blur-sm">68</span>
+      <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 animate-pulse">Calculating</span>
     </div>
-    <div className="mx-auto mb-3 w-fit rounded-full border border-emerald-700/40 bg-emerald-900 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white">
-      +20 pts
-    </div>
-    <h3 className="text-sm font-extrabold tracking-tight text-slate-800">Let&apos;s see how to boost your rating.</h3>
-    <p className="mx-auto mt-2 max-w-[18rem] text-xs font-medium leading-relaxed text-slate-500">
-      Answer 4 quick questions to simulate your easiest &apos;quick wins&apos; for a stronger profile.
-    </p>
-    <div className="mt-5 grid grid-cols-3 gap-2.5" aria-label="Potential improvement slots">
-      {[
-        { icon: '🛡️', label: 'Health Shield' },
-        { icon: '🌴', label: 'Lifestyle Fund' },
-        { icon: '🛡️', label: 'Life Protection' }
-      ].map((slot) => (
-        <div key={slot.label} className="flex min-h-[5.25rem] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/60 px-2 py-3 text-center text-[11px] font-bold leading-tight text-slate-500 opacity-60">
-          <span className="text-lg grayscale">{slot.icon}</span>
-          <span>{slot.label}</span>
-        </div>
-      ))}
-    </div>
+  </div>
+);
+
+const CopyIcon = ({ className = 'h-4 w-4' }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <rect x="8" y="8" width="11" height="11" rx="2" strokeWidth={2.2} />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+
+const QuestionPulseIcon = () => (
+  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-indigo-100 bg-white text-indigo-600 shadow-sm animate-pulse">
+    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M9.5 9a2.5 2.5 0 1 1 4.2 1.84c-.98.83-1.7 1.39-1.7 2.66" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 17h.01" />
+      <circle cx="12" cy="12" r="9" strokeWidth={2.2} />
+    </svg>
   </div>
 );
 
@@ -502,8 +393,7 @@ const AnalyzingScreen = ({ onComplete }) => {
   );
 };
 
-const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebrationActive }) => {
-  const [showBreakdown, setShowBreakdown] = useState(false);
+const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubmitted, celebrationActive, scoreRevealed }) => {
   const [isNaturalCtaVisible, setIsNaturalCtaVisible] = useState(false);
   const dashboardScrollRef = useRef(null);
   const naturalCtaRef = useRef(null);
@@ -555,62 +445,31 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
               </svg>
             </button>
           </div>
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Your Financial Fortress</h2>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">
+            {scoreRevealed ? 'Your Financial Fortress' : 'Layer Analysis'}
+          </h2>
 
         <div className="relative mx-auto w-40 h-40 mb-6">
           <div className="absolute inset-0 flex items-center justify-center">
-            <ScoreRing score={data.score} colorClass={data.scoreColor} />
+            {scoreRevealed ? <ScoreRing score={data.score} colorClass={data.scoreColor} /> : <CalibratingScorePlaceholder />}
           </div>
           <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-2xl border-2 border-slate-50 z-20 transform translate-x-2 -translate-y-2">
-            {data.persona.emoji}
+            {scoreRevealed ? data.persona.emoji : '🛡️'}
           </div>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-slate-800 mb-2 tracking-tight">{data.persona.title}</h1>
-        <p className="text-slate-500 text-sm leading-relaxed max-w-[280px] mx-auto font-medium">{data.persona.subtitle}</p>
-
-        <div className="mt-6 text-left max-w-[280px] mx-auto">
-          <button
-            onClick={() => setShowBreakdown(!showBreakdown)}
-            className="w-full flex items-center justify-between py-2 text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
-          >
-            <span>How this was estimated</span>
-            <svg className={`w-4 h-4 transition-transform ${showBreakdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {showBreakdown && (
-            <div className="mt-3 space-y-3 animate-fade-in pb-2">
-              {[
-                { label: 'Cash Flow & Income', value: data.breakdown.cashflow, max: 25 },
-                { label: 'Emergency Safety Net', value: data.breakdown.emergency, max: 20 },
-                { label: 'Protection Coverage', value: data.breakdown.protection, max: 30 },
-                { label: 'Goals & Direction', value: data.breakdown.goals, max: 25 }
-              ].map((item, idx) => {
-                const percent = (item.value / item.max) * 100;
-
-                return (
-                  <div key={idx}>
-                    <div className="flex justify-between text-[11px] font-semibold text-slate-600 mb-1">
-                      <span>{item.label}</span>
-                      <span className="text-slate-400">
-                        {item.value}/{item.max}
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-1.5">
-                      <div className="progress-fill h-1.5 rounded-full" style={{ width: `${percent}%`, backgroundColor: getProgressColor(percent) }}></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        <h1 className="text-2xl font-extrabold text-slate-800 mb-2 tracking-tight">
+          {scoreRevealed ? data.persona.title : 'Analyzing your inputs...'}
+        </h1>
+        <p className="text-slate-500 text-sm leading-relaxed max-w-[300px] mx-auto font-medium">
+          {scoreRevealed
+            ? data.persona.subtitle
+            : 'We found a few vulnerabilities in your safety net. We need to calibrate your profile to calculate your exact score.'}
+        </p>
       </div>
 
         <div className="px-5 mt-6 mb-8 pb-[calc(env(safe-area-inset-bottom)+7.5rem)] space-y-4">
-        <h3 className="font-bold text-slate-800 px-1 text-sm">Layer Analysis</h3>
+        <h3 className="font-bold text-slate-800 px-1 text-sm">Quick Layer Preview</h3>
 
         {data.threats.map((threat, idx) => (
           <div
@@ -631,22 +490,24 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
           </div>
         ))}
 
-        <QuickWinSimulatorCard />
-
           <div ref={naturalCtaRef} className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10">
-            <span className="text-3xl mb-3 block">{data.cta.icon}</span>
-            <h3 className="text-lg font-bold mb-2 tracking-tight">{data.cta.headline}</h3>
-            <p className="text-sm text-slate-300 mb-6 leading-relaxed font-medium">{data.cta.hook}</p>
-            <p className="mb-3 text-center text-xs font-semibold text-slate-300">Takes ~30 seconds.</p>
+            <span className="text-3xl mb-3 block">{scoreRevealed ? '📩' : data.cta.icon}</span>
+            <h3 className="text-lg font-bold mb-2 tracking-tight">
+              {scoreRevealed ? 'Your calibrated roadmap is ready.' : data.cta.headline}
+            </h3>
+            <p className="text-sm text-slate-300 mb-6 leading-relaxed font-medium">
+              {scoreRevealed ? 'You can revisit the submitted roadmap summary anytime from here.' : data.cta.hook}
+            </p>
+            {!scoreRevealed && <p className="mb-3 text-center text-xs font-semibold text-slate-300">Takes ~30 seconds.</p>}
 
             <Button
-              onClick={() => onTransitionToQuote(data.cta)}
+              onClick={() => (scoreRevealed ? onViewSubmitted() : onTransitionToQuote(data.cta))}
               variant="emerald"
               className="cta-quick-wins-motion mb-3 border border-emerald-200/70 text-white"
             >
-                {data.cta.buttonText}
+                {scoreRevealed ? 'View Sent Roadmap' : 'Calibrate My Score'}
             </Button>
 
             <button
@@ -663,8 +524,12 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
       {!isNaturalCtaVisible && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent animate-slide-up">
           <div className="pointer-events-auto">
-            <Button onClick={() => onTransitionToQuote(data.cta)} variant="emerald" className="cta-quick-wins-motion border border-emerald-200/70 text-white">
-              {data.cta.buttonText}
+            <Button
+              onClick={() => (scoreRevealed ? onViewSubmitted() : onTransitionToQuote(data.cta))}
+              variant="emerald"
+              className="cta-quick-wins-motion border border-emerald-200/70 text-white"
+            >
+              {scoreRevealed ? 'View Sent Roadmap' : 'Calibrate My Score'}
             </Button>
           </div>
         </div>
@@ -701,6 +566,8 @@ function App() {
     consent: false
   });
   const [quoteIntent, setQuoteIntent] = useState(null);
+  const [hasSubmittedLead, setHasSubmittedLead] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const [completionFx, setCompletionFx] = useState({ active: false, moduleId: null, final: false });
   const [pendingHubScroll, setPendingHubScroll] = useState(false);
@@ -746,7 +613,8 @@ function App() {
           }
         : null
     );
-    setScreen('quote_transition');
+    setQuoteStep(1);
+    setScreen('quote_form');
   };
 
   useEffect(() => () => clearTimers(), []);
@@ -811,6 +679,8 @@ function App() {
       consent: false
     });
     setQuoteIntent(null);
+    setHasSubmittedLead(false);
+    setIsCopied(false);
     setCompletionFx({ active: false, moduleId: null, final: false });
     setPendingHubScroll(false);
     setAnalyzeButtonReady(false);
@@ -1294,10 +1164,6 @@ function App() {
     );
   };
 
-  const renderQuoteTransition = () => (
-    <QuickReviewIntroScreen onPrimary={() => setScreen('quote_form')} onSecondary={() => setScreen('dashboard')} quoteIntent={quoteIntent} />
-  );
-
   const renderQuoteForm = () => {
     const updateQuote = (field, value) => setQuoteData((prev) => ({ ...prev, [field]: value }));
     const clampAge = (value) => Math.max(18, Math.min(99, Number(value) || 30));
@@ -1355,19 +1221,22 @@ function App() {
           body: JSON.stringify(payload)
         });
 
+        let responseBody = null;
+
+        try {
+          responseBody = await response.json();
+        } catch {
+          responseBody = null;
+        }
+
         if (!response.ok) {
           let message = 'Unable to submit your request right now.';
-
-          try {
-            const errorBody = await response.json();
-            message = errorBody.error || message;
-          } catch {
-            // Keep the generic message when Cloudflare returns a non-JSON error page.
-          }
+          message = responseBody?.error || message;
 
           throw new Error(message);
         }
 
+        setHasSubmittedLead(true);
         setQuoteSuccessCelebration(true);
         setScreen('quote_teaser');
         schedule(() => setQuoteSuccessCelebration(false), 2400);
@@ -1386,11 +1255,11 @@ function App() {
 
       submitLead();
     };
-    const prevStep = () => (quoteStep > 1 ? setQuoteStep((prev) => prev - 1) : setScreen('quote_transition'));
+    const prevStep = () => (quoteStep > 1 ? setQuoteStep((prev) => prev - 1) : setScreen('dashboard'));
 
     const canProceed = () => {
       if (quoteStep === 1) {
-        return quoteData.age && quoteData.gender;
+        return quoteData.age;
       }
 
       if (quoteStep === 2) {
@@ -1415,7 +1284,7 @@ function App() {
             <button onClick={prevStep} className="text-slate-400 hover:text-slate-600 font-medium text-sm flex items-center gap-1">
               ← Back
             </button>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Step {quoteStep} of 4</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Calibration</span>
           </div>
           <div className="w-full bg-slate-100 h-1.5 rounded-full">
             <div
@@ -1428,13 +1297,13 @@ function App() {
         <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 hide-scrollbar">
           {quoteStep === 1 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-6">{quoteIntent?.wizardHeadline || 'Basic Details'}</h2>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-6">Calibrate your age range</h2>
               <div className="bg-slate-100/80 p-3 rounded-xl mb-8 flex gap-3 items-start border border-slate-200/60">
                 <svg className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  Age and gender help us estimate possible premium ranges more accurately. This is kept strictly private.
+                  Age helps us calibrate your score and prepare a more realistic beginner-friendly roadmap. This is kept strictly private.
                 </p>
               </div>
               <div className="space-y-6">
@@ -1470,20 +1339,6 @@ function App() {
                   </div>
                   <p className="mt-2 text-center text-[11px] font-medium text-slate-400">Hold a button to adjust faster.</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Gender</label>
-                  <div className="flex gap-3">
-                    {['Male', 'Female'].map((g) => (
-                      <button
-                        key={g}
-                        onClick={() => updateQuote('gender', g)}
-                        className={`flex-1 py-4 rounded-2xl border-2 font-bold transition-all ${quoteData.gender === g ? 'border-slate-800 bg-slate-800 text-white shadow-md' : 'border-slate-100 bg-white text-slate-600 shadow-sm'}`}
-                      >
-                        {g}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -1515,9 +1370,9 @@ function App() {
 
           {quoteStep === 3 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Choose Your Starting Level</h2>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Pick Your Comfort Zone</h2>
               <p className="text-slate-500 text-sm mb-6 font-medium">
-                This helps us prepare options that match both your goals and comfort level. You can adjust this later.
+                Pick a starting point that fits naturally into your routine. Nothing is locked in, and you can always adjust as you go.
               </p>
               <div className="space-y-4">
                 {[
@@ -1611,13 +1466,25 @@ function App() {
               <p className="mt-6 text-[11px] text-slate-400 font-medium text-center leading-relaxed px-4">
                 You can adjust this later. A higher range may allow more flexibility, stronger coverage, or added savings features depending on your profile.
               </p>
+              <p className="mt-3 text-xs text-slate-400 font-medium text-center">Zero payment required. No commitment.</p>
             </div>
           )}
 
           {quoteStep === 4 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Almost done!</h2>
-              <p className="text-slate-500 text-sm mb-6 font-medium">Where should we send your detailed profile assessment?</p>
+              <div className="mb-5 flex justify-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600 shadow-sm animate-pulse">
+                  <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M3.75 6.75h16.5v10.5H3.75z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="m4.5 7.5 7.5 5.25 7.5-5.25" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M15.75 12.75 20.25 17.25M8.25 12.75 3.75 17.25" />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Where should we send your results?</h2>
+              <p className="text-slate-500 text-sm mb-6 font-medium">
+                Your analysis is complete. Let us know where to deliver your exact score and personalized roadmap.
+              </p>
               <div className="space-y-5">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1">Full Name</label>
@@ -1674,7 +1541,7 @@ function App() {
 
         <div className="absolute bottom-0 left-0 w-full p-5 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent z-20">
           <Button disabled={!canProceed() || isSubmitting} onClick={nextStep}>
-            {quoteStep < 4 ? 'Continue' : isSubmitting ? 'Sending...' : 'Send My Summary'}
+            {quoteStep < 4 ? 'Continue' : isSubmitting ? 'Revealing...' : 'Reveal My Score & Roadmap'}
           </Button>
         </div>
       </div>
@@ -1682,43 +1549,115 @@ function App() {
   };
 
   const renderQuoteTeaser = () => {
-    const getGoalText = (id) => ({ family: 'Family Protection', health: 'Health & Illness', savings: 'Savings + Protection', explore: 'Exploring Options' }[id] || 'General Estimate');
+    const getGoalText = (id) => ({ family: 'Family Protection', health: 'Health & Illness', savings: 'Savings + Protection', invest: 'Investment Growth', explore: 'Exploring Options' }[id] || 'General Estimate');
+    const getBudgetText = (id) =>
+      ({
+        '<1500': 'below ₱1,500/month',
+        '1500-3000': '₱1,500-₱3,000/month',
+        '3000-5000': '₱3,000-₱5,000/month',
+        '5000+': '₱5,000+/month',
+        unsure: 'a flexible starter range'
+      }[id] || 'your selected range');
+    const scoreData = calculateFortressData;
+    const budgetText = getBudgetText(quoteData.budget);
+    const breakdownItems = [
+      { label: 'Cash Flow & Income', value: scoreData.breakdown.cashflow, max: 25 },
+      { label: 'Emergency Safety Net', value: scoreData.breakdown.emergency, max: 20 },
+      { label: 'Protection Coverage', value: scoreData.breakdown.protection, max: 30 },
+      { label: 'Goals & Direction', value: scoreData.breakdown.goals, max: 25 }
+    ];
+    const handleCopyShare = async () => {
+      const shareText =
+        "Just used this free tool to check my financial safety net. It takes 30 seconds and doesn't ask for exact income. Highly recommend checking your blind spots: https://assess.lablibre.com";
+
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setIsCopied(true);
+        const copyTimerId = window.setTimeout(() => {
+          timersRef.current = timersRef.current.filter((timerId) => timerId !== copyTimerId);
+          setIsCopied(false);
+        }, 2000);
+        timersRef.current.push(copyTimerId);
+      } catch {
+        alert('Unable to copy the share text right now. Please try again.');
+      }
+    };
 
     return (
       <div className="h-full flex flex-col bg-slate-50 overflow-y-auto hide-scrollbar relative overflow-hidden">
         <CelebrationOverlay active={quoteSuccessCelebration} src={LOTTIE_URLS.success} className="bg-white/30 backdrop-blur-[2px]" />
-        <div className="bg-slate-800 px-6 pt-16 pb-20 text-center relative z-10 shrink-0 rounded-b-[2.5rem] shadow-md animate-slide-up">
-          <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 mx-auto rounded-[1.5rem] flex items-center justify-center text-3xl mb-6 border border-emerald-500/30">📩</div>
-          <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">You’re All Set!!</h2>
-          <p className="text-slate-300 text-sm font-medium">An advisor will review your profile shortly.</p>
+        <div className="bg-slate-800 px-6 pt-12 pb-20 text-center relative z-10 shrink-0 rounded-b-[2.5rem] shadow-md animate-slide-up">
+          <div className="relative mx-auto w-40 h-40 mb-5">
+            <div className="absolute inset-0 flex items-center justify-center rounded-full bg-white shadow-lg">
+              <ScoreRing score={scoreData.score} colorClass={scoreData.scoreColor} />
+            </div>
+            <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-2xl border-2 border-slate-50 z-20 transform translate-x-2 -translate-y-2">
+              {scoreData.persona.emoji}
+            </div>
+          </div>
+          <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Your Fortress Score is {scoreData.score}/100</h2>
+          <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-[300px] mx-auto">
+            Calibration complete! Your beginner-friendly roadmap for {budgetText} is being finalized. We will send the exact next steps directly to your email.
+          </p>
+          <p className="mt-4 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-xs font-bold leading-relaxed text-emerald-100">
+            Please note: Reviewing your options requires absolutely no commitment or payment.
+          </p>
         </div>
 
         <div className="px-5 -mt-12 relative z-20 space-y-4 pb-10">
           <div className="bg-white rounded-[1.5rem] p-6 shadow-md border border-slate-100">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-5 block">Your Snapshot Summary</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-5 block">Your Roadmap Summary</span>
             <div className="space-y-4">
+              <div className="flex justify-between items-end border-b border-slate-50 pb-3">
+                <span className="text-xs text-slate-500 font-medium">Score Type</span>
+                <span className="font-bold text-slate-800 text-sm text-right">{scoreData.persona.title}</span>
+              </div>
               <div className="flex justify-between items-end border-b border-slate-50 pb-3">
                 <span className="text-xs text-slate-500 font-medium">Suggested Focus</span>
                 <span className="font-bold text-slate-800 text-sm text-right">{getGoalText(quoteData.goal)}</span>
               </div>
               <div className="flex justify-between items-end border-b border-slate-50 pb-3">
                 <span className="text-xs text-slate-500 font-medium">Comfort Range</span>
-                <span className="font-bold text-slate-800 text-sm text-right">{quoteData.budget.replace('-', ' - ')}/mo</span>
+                <span className="font-bold text-slate-800 text-sm text-right">{budgetText}</span>
               </div>
               <div className="flex justify-between items-end pb-1">
                 <span className="text-xs text-slate-500 font-medium">Status</span>
                 <span className="font-bold text-emerald-600 text-sm text-right flex items-center gap-1.5">
                   <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  Profile Shared
+                  Score Revealed
                 </span>
               </div>
             </div>
           </div>
 
+          <div className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-slate-100">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-5 block">How it was calculated</span>
+            <div className="space-y-3">
+              {breakdownItems.map((item) => {
+                const percent = (item.value / item.max) * 100;
+
+                return (
+                  <div key={item.label}>
+                    <div className="flex justify-between text-[11px] font-semibold text-slate-600 mb-1">
+                      <span>{item.label}</span>
+                      <span className="text-slate-400">
+                        {item.value}/{item.max}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className="progress-fill h-1.5 rounded-full" style={{ width: `${percent}%`, backgroundColor: getProgressColor(percent) }}></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="bg-slate-100/50 rounded-[1.5rem] p-6 border border-slate-200/50 text-center">
+            <QuestionPulseIcon />
             <h3 className="font-bold text-slate-800 mb-2 text-sm">What happens next?</h3>
             <p className="text-xs text-slate-500 leading-relaxed mb-0 font-medium">
-              We&apos;ll send your detailed profile assessment by email and may follow up with guidance that matches your results. Feel free to ask questions with absolutely zero commitment.
+              We&apos;ll send your detailed profile assessment by email and may follow up with guidance that matches your results and selected budget. Feel free to ask questions with absolutely zero commitment.
             </p>
           </div>
 
@@ -1726,6 +1665,24 @@ function App() {
             <Button onClick={() => setScreen('dashboard')} variant="primary" className="py-3.5">
               Back to My Fortress
             </Button>
+            <button
+              type="button"
+              onClick={handleCopyShare}
+              className={`w-full py-3.5 px-6 rounded-2xl border-2 font-bold transition-all duration-200 flex items-center justify-center gap-2 text-sm ${
+                isCopied
+                  ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
+                  : 'bg-white border-slate-300 text-slate-700 shadow-sm hover:border-slate-400 hover:bg-slate-50'
+              }`}
+            >
+              {isCopied ? (
+                'Link Copied! ✅'
+              ) : (
+                <>
+                  <CopyIcon />
+                  <span>Share the Tool</span>
+                </>
+              )}
+            </button>
             <Button onClick={restartJourney} variant="secondary" className="py-3.5">
               Start Over
             </Button>
@@ -1755,10 +1712,11 @@ function App() {
             data={calculateFortressData}
             onTransitionToQuote={handleTransitionToQuote}
             onResetJourney={restartJourney}
+            onViewSubmitted={() => setScreen('quote_teaser')}
             celebrationActive={dashboardCelebration}
+            scoreRevealed={hasSubmittedLead}
           />
         )}
-        {screen === 'quote_transition' && renderQuoteTransition()}
         {screen === 'quote_form' && renderQuoteForm()}
         {screen === 'quote_teaser' && renderQuoteTeaser()}
       </div>

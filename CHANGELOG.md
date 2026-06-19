@@ -1,11 +1,46 @@
 # Changelog
 
-## Unreleased - 2026-06-18
+## 1.5.11 - 2026-06-19
+
+Prompt context:
+- Remove the Quick Win Simulator friction from the fortress page and improve the final roadmap summary with calculation details and private sharing.
+
+Changes:
+- Removed `QuickWinSimulatorCard` from the fortress/gap reveal page.
+- Restored the "How it was calculated" breakdown card below the final roadmap summary.
+- Added an animated question icon above the "What happens next?" section.
+- Added a mobile-first "Share the Tool" copy-to-clipboard button on the final success screen.
+- Added copied-state feedback that switches the share button to "Link Copied! ✅" for 2 seconds.
+- Bumped project version for the final-screen sharing and roadmap summary refinements.
+
+## 1.5.10 - 2026-06-19
+
+Prompt context:
+- Update Budget, Contact, and Success screen copy/icons in the calibration funnel while preserving dynamic score and budget rendering.
+
+Changes:
+- Updated the budget step headline and support copy to use "Pick Your Comfort Zone" language.
+- Added budget-step assurance microcopy: "Zero payment required. No commitment."
+- Updated the contact step headline/subtext and added an animated email/send SVG icon above the heading.
+- Updated the final reveal body copy to inject the selected budget label into the new roadmap-finalization message.
+- Added highlighted no-commitment/no-payment assurance copy on the success screen.
+- Removed now-unused contact-copy response state from the frontend success copy path.
+- Bumped project version for the funnel copy and UI icon update.
+
+## 1.5.9 - 2026-06-19
 
 Prompt context:
 - Refine the "Fortress" score dashboard CTA logic with a Quick Win Simulator pattern that feels useful, low-pressure, and conversion-friendly.
+- Implement a delayed score reveal flow that shows gap analysis first, calibrates the score through follow-up questions, then unlocks the final score after contact submission.
+- After score calibration, let users move between the revealed fortress page and the submitted roadmap page.
+- Add a compass favicon and keep version/changelog updates tied to repository pushes.
 
 Changes:
+- Added the delayed reveal/calibration flow so the fortress page initially hides the score behind a calculating state until the lead flow is completed.
+- Updated the post-submit fortress page to show the actual Score Ring and provide a "View Sent Roadmap" path back to the submitted roadmap summary.
+- Added optional Cloudflare contact-copy email support through `SEND_CONTACT_COPY=true`, while preserving owner lead notification as the primary submission path.
+- Added Open Graph/Twitter preview thumbnails and SEO metadata for social sharing and search.
+- Added a local compass SVG favicon and linked it from `index.html`.
 - Replaced the rejected locked-blueprint teaser with a Quick Win Simulator card below the main score area.
 - Added inactive column-card improvement slots for Health Shield, Lifestyle Fund, and Life Protection.
 - Moved the Quick Win Simulator below Layer Analysis and styled the increase badge with white text on a dark green background.
@@ -18,6 +53,7 @@ Changes:
 - Added `quoteIntent` to the lead submission payload so downstream handling can see which CTA path the user selected.
 - Replaced the quote Step 1 birthdate input with a mobile-first age stepper that supports press-and-hold adjustment.
 - Updated lead payloads and notification emails to use `age` plus computed `birthYear`, rendered as "Age (Year)".
+- Bumped project version for the delayed reveal, revisit navigation, favicon, SEO preview, and Cloudflare contact-copy updates.
 
 ## 1.5.8 - 2026-06-17
 
