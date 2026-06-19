@@ -1,11 +1,19 @@
 # Changelog
 
-## Unreleased - 2026-06-18
+## 1.5.9 - 2026-06-19
 
 Prompt context:
 - Refine the "Fortress" score dashboard CTA logic with a Quick Win Simulator pattern that feels useful, low-pressure, and conversion-friendly.
+- Implement a delayed score reveal flow that shows gap analysis first, calibrates the score through follow-up questions, then unlocks the final score after contact submission.
+- After score calibration, let users move between the revealed fortress page and the submitted roadmap page.
+- Add a compass favicon and keep version/changelog updates tied to repository pushes.
 
 Changes:
+- Added the delayed reveal/calibration flow so the fortress page initially hides the score behind a calculating state until the lead flow is completed.
+- Updated the post-submit fortress page to show the actual Score Ring and provide a "View Sent Roadmap" path back to the submitted roadmap summary.
+- Added optional Cloudflare contact-copy email support through `SEND_CONTACT_COPY=true`, while preserving owner lead notification as the primary submission path.
+- Added Open Graph/Twitter preview thumbnails and SEO metadata for social sharing and search.
+- Added a local compass SVG favicon and linked it from `index.html`.
 - Replaced the rejected locked-blueprint teaser with a Quick Win Simulator card below the main score area.
 - Added inactive column-card improvement slots for Health Shield, Lifestyle Fund, and Life Protection.
 - Moved the Quick Win Simulator below Layer Analysis and styled the increase badge with white text on a dark green background.
@@ -18,6 +26,7 @@ Changes:
 - Added `quoteIntent` to the lead submission payload so downstream handling can see which CTA path the user selected.
 - Replaced the quote Step 1 birthdate input with a mobile-first age stepper that supports press-and-hold adjustment.
 - Updated lead payloads and notification emails to use `age` plus computed `birthYear`, rendered as "Age (Year)".
+- Bumped project version for the delayed reveal, revisit navigation, favicon, SEO preview, and Cloudflare contact-copy updates.
 
 ## 1.5.8 - 2026-06-17
 

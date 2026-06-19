@@ -406,7 +406,7 @@ const AnalyzingScreen = ({ onComplete }) => {
   );
 };
 
-const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebrationActive }) => {
+const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubmitted, celebrationActive, scoreRevealed }) => {
   const [isNaturalCtaVisible, setIsNaturalCtaVisible] = useState(false);
   const dashboardScrollRef = useRef(null);
   const naturalCtaRef = useRef(null);
@@ -458,20 +458,26 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
               </svg>
             </button>
           </div>
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Layer Analysis</h2>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">
+            {scoreRevealed ? 'Your Financial Fortress' : 'Layer Analysis'}
+          </h2>
 
         <div className="relative mx-auto w-40 h-40 mb-6">
           <div className="absolute inset-0 flex items-center justify-center">
-            <CalibratingScorePlaceholder />
+            {scoreRevealed ? <ScoreRing score={data.score} colorClass={data.scoreColor} /> : <CalibratingScorePlaceholder />}
           </div>
           <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-2xl border-2 border-slate-50 z-20 transform translate-x-2 -translate-y-2">
-            🛡️
+            {scoreRevealed ? data.persona.emoji : '🛡️'}
           </div>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-slate-800 mb-2 tracking-tight">Analyzing your inputs...</h1>
+        <h1 className="text-2xl font-extrabold text-slate-800 mb-2 tracking-tight">
+          {scoreRevealed ? data.persona.title : 'Analyzing your inputs...'}
+        </h1>
         <p className="text-slate-500 text-sm leading-relaxed max-w-[300px] mx-auto font-medium">
-          We found a few vulnerabilities in your safety net. We need to calibrate your profile to calculate your exact score.
+          {scoreRevealed
+            ? data.persona.subtitle
+            : 'We found a few vulnerabilities in your safety net. We need to calibrate your profile to calculate your exact score.'}
         </p>
       </div>
 
@@ -502,17 +508,21 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
           <div ref={naturalCtaRef} className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10">
-            <span className="text-3xl mb-3 block">{data.cta.icon}</span>
-            <h3 className="text-lg font-bold mb-2 tracking-tight">{data.cta.headline}</h3>
-            <p className="text-sm text-slate-300 mb-6 leading-relaxed font-medium">{data.cta.hook}</p>
-            <p className="mb-3 text-center text-xs font-semibold text-slate-300">Takes ~30 seconds.</p>
+            <span className="text-3xl mb-3 block">{scoreRevealed ? '📩' : data.cta.icon}</span>
+            <h3 className="text-lg font-bold mb-2 tracking-tight">
+              {scoreRevealed ? 'Your calibrated roadmap is ready.' : data.cta.headline}
+            </h3>
+            <p className="text-sm text-slate-300 mb-6 leading-relaxed font-medium">
+              {scoreRevealed ? 'You can revisit the submitted roadmap summary anytime from here.' : data.cta.hook}
+            </p>
+            {!scoreRevealed && <p className="mb-3 text-center text-xs font-semibold text-slate-300">Takes ~30 seconds.</p>}
 
             <Button
-              onClick={() => onTransitionToQuote(data.cta)}
+              onClick={() => (scoreRevealed ? onViewSubmitted() : onTransitionToQuote(data.cta))}
               variant="emerald"
               className="cta-quick-wins-motion mb-3 border border-emerald-200/70 text-white"
             >
-                Calibrate My Score
+                {scoreRevealed ? 'View Sent Roadmap' : 'Calibrate My Score'}
             </Button>
 
             <button
@@ -529,8 +539,12 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, celebratio
       {!isNaturalCtaVisible && (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent animate-slide-up">
           <div className="pointer-events-auto">
-            <Button onClick={() => onTransitionToQuote(data.cta)} variant="emerald" className="cta-quick-wins-motion border border-emerald-200/70 text-white">
-              Calibrate My Score
+            <Button
+              onClick={() => (scoreRevealed ? onViewSubmitted() : onTransitionToQuote(data.cta))}
+              variant="emerald"
+              className="cta-quick-wins-motion border border-emerald-200/70 text-white"
+            >
+              {scoreRevealed ? 'View Sent Roadmap' : 'Calibrate My Score'}
             </Button>
           </div>
         </div>
@@ -568,6 +582,7 @@ function App() {
   });
   const [quoteIntent, setQuoteIntent] = useState(null);
   const [contactCopySent, setContactCopySent] = useState(false);
+  const [hasSubmittedLead, setHasSubmittedLead] = useState(false);
 
   const [completionFx, setCompletionFx] = useState({ active: false, moduleId: null, final: false });
   const [pendingHubScroll, setPendingHubScroll] = useState(false);
@@ -680,6 +695,7 @@ function App() {
     });
     setQuoteIntent(null);
     setContactCopySent(false);
+    setHasSubmittedLead(false);
     setCompletionFx({ active: false, moduleId: null, final: false });
     setPendingHubScroll(false);
     setAnalyzeButtonReady(false);
@@ -1236,6 +1252,7 @@ function App() {
         }
 
         setContactCopySent(Boolean(responseBody?.contactCopy?.sent));
+        setHasSubmittedLead(true);
         setQuoteSuccessCelebration(true);
         setScreen('quote_teaser');
         schedule(() => setQuoteSuccessCelebration(false), 2400);
@@ -1635,7 +1652,9 @@ function App() {
             data={calculateFortressData}
             onTransitionToQuote={handleTransitionToQuote}
             onResetJourney={restartJourney}
+            onViewSubmitted={() => setScreen('quote_teaser')}
             celebrationActive={dashboardCelebration}
+            scoreRevealed={hasSubmittedLead}
           />
         )}
         {screen === 'quote_form' && renderQuoteForm()}
