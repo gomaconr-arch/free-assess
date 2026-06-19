@@ -68,8 +68,13 @@ In the same Pages project, go to Settings > Environment variables and add:
 - `CLOUDFLARE_EMAIL_API_TOKEN`: the API token with Email Sending permission
 - `EMAIL_TO`: `info@lablibre.com`
 - `EMAIL_FROM`: `info@lablibre.com`
+- `SEND_CONTACT_COPY`: optional, set to `true` to email the submitted contact a copy of their score and roadmap summary
 
 If you prefer the Gmail inbox to receive lead notifications directly, set `EMAIL_TO=richard.badlisan@gmail.com` instead. Keep `EMAIL_FROM=info@lablibre.com` because the sender should be on the verified Cloudflare zone.
+
+By default, the Function sends the complete lead report only to `EMAIL_TO`. When `SEND_CONTACT_COPY=true`, the Function also sends a customer-facing copy to the email address entered in the form. The contact-copy send is best effort: if the owner notification succeeds but Cloudflare rejects the contact copy, the form still completes and the failure is logged in the Pages Function logs.
+
+For contact copies, make sure Cloudflare Email Sending allows your verified `EMAIL_FROM` sender to send to external recipients. If your Cloudflare account or email setup restricts recipients, leave `SEND_CONTACT_COPY` unset and use the owner notification workflow instead.
 
 Redeploy the Pages project after adding or changing environment variables.
 
@@ -99,6 +104,7 @@ CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
 CLOUDFLARE_EMAIL_API_TOKEN=your_email_sending_api_token
 EMAIL_TO=info@lablibre.com
 EMAIL_FROM=info@lablibre.com
+SEND_CONTACT_COPY=true
 ```
 
 Run the app through Cloudflare Pages local development when testing the Function endpoint locally. A plain Vite dev server will run the frontend, but it will not execute `functions/api/submit.js`.
