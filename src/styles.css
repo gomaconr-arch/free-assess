@@ -237,6 +237,72 @@ body {
   white-space: nowrap;
 }
 
+.preview-carousel {
+  scroll-padding-inline: 1.25rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.story-carousel {
+  scroll-padding-inline: 0;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.preview-card-shell {
+  perspective: 1200px;
+}
+
+.preview-card-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.preview-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.preview-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.preview-card-back {
+  transform: rotateY(180deg);
+}
+
+.preview-card-slide {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.preview-card-slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 82% 12%, rgb(255 255 255 / 22%), transparent 22%),
+    radial-gradient(circle at 16% 88%, rgb(255 255 255 / 16%), transparent 26%),
+    linear-gradient(135deg, rgb(255 255 255 / 12%), transparent 42%);
+  mix-blend-mode: screen;
+}
+
+.preview-card-icon {
+  animation: previewIconFloat 4.8s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.preview-card-icon svg {
+  animation: previewIconTilt 6.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(20px);
@@ -256,6 +322,32 @@ body {
 
   to {
     opacity: 1;
+  }
+}
+
+@keyframes previewIconFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(0, -5px, 0) scale(1.03);
+  }
+}
+
+@keyframes previewIconTilt {
+  0%,
+  100% {
+    transform: rotateY(0deg) rotateZ(0deg);
+  }
+
+  45% {
+    transform: rotateY(10deg) rotateZ(-2deg);
+  }
+
+  70% {
+    transform: rotateY(-6deg) rotateZ(1deg);
   }
 }
 
@@ -483,8 +575,12 @@ body {
   .map-milestone-dot,
   .map-angled-route,
   .welcome-logo,
-  .screen-mesh::before {
+  .preview-card-icon,
+  .preview-card-icon svg,
+  .screen-mesh::before,
+  .preview-card-inner {
     animation: none;
+    transition: none;
   }
 
   .map-angled-route {

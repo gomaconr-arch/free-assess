@@ -157,7 +157,7 @@ const buildReportSections = (payload) => {
       ]
     },
     {
-      title: 'Fortress Score',
+      title: 'Financial Foundation Score',
       rows: [
         ['Overall Score', scoreData.score != null ? `${scoreData.score}/100` : '-'],
         ['Persona', scoreData.persona?.title],
@@ -228,7 +228,7 @@ const formatContactCopyText = (payload) => {
   return [
     `Hi ${quoteData.name || 'there'},`,
     '',
-    `Your Financial Fortress Score is ${scoreData.score ?? '-'}/100.`,
+    `Your Financial Foundation Score is ${scoreData.score ?? '-'}/100.`,
     scoreData.persona?.title ? `Profile: ${scoreData.persona.title}` : null,
     labelValue('goal', quoteData.goal) ? `Suggested focus: ${labelValue('goal', quoteData.goal)}` : null,
     labelValue('budget', quoteData.budget) ? `Selected comfort range: ${labelValue('budget', quoteData.budget)}` : null,
@@ -246,8 +246,8 @@ const formatContactCopyHtml = (payload) => {
 
   return `
     <div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5;">
-      <h1 style="font-size:22px;margin:0 0 10px;">Your Financial Fortress Score is ${escapeHtml(scoreData.score ?? '-')}/100</h1>
-      <p style="margin:0 0 18px;color:#475569;">Hi ${escapeHtml(quoteData.name || 'there')}, your profile is calibrated.</p>
+      <h1 style="font-size:22px;margin:0 0 10px;">Your Financial Foundation Score is ${escapeHtml(scoreData.score ?? '-')}/100</h1>
+      <p style="margin:0 0 18px;color:#475569;">Hi ${escapeHtml(quoteData.name || 'there')}, your profile summary is ready.</p>
       <table style="border-collapse:collapse;width:100%;max-width:620px;border:1px solid #e2e8f0;margin-bottom:18px;">
         <tbody>
           <tr>
@@ -333,7 +333,7 @@ export async function onRequestPost({ request, env }) {
     let contactCopy = { sent: false };
 
     if (String(env.SEND_CONTACT_COPY || '').toLowerCase() === 'true') {
-      const copySubject = 'Your Financial Fortress Score and Roadmap';
+      const copySubject = 'Your Financial Foundation Score and Roadmap';
       const copyResponse = await sendCloudflareEmail({
         env,
         to: contactEmail,

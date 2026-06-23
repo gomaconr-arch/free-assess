@@ -1,5 +1,19 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
-import { Compass } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Banknote,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  HeartPulse,
+  Info,
+  Landmark,
+  SlidersHorizontal,
+  Sprout,
+  UserRoundCog,
+  WalletCards
+} from 'lucide-react';
 
 const Lottie = lazy(() => import('lottie-react'));
 
@@ -7,7 +21,7 @@ const LOTTIE_URLS = {
   checkmark: 'checkmark',
   microCelebrate: 'microCelebrate',
   roadmapCelebrate: 'roadmapCelebrate',
-  fortressReveal: 'fortressReveal',
+  foundationReveal: 'foundationReveal',
   success: 'checkmark'
 };
 
@@ -15,7 +29,7 @@ const animationLoaders = {
   checkmark: () => import('./assets/lottie/checkmark.json'),
   microCelebrate: () => import('./assets/lottie/microCelebrate.json'),
   roadmapCelebrate: () => import('./assets/lottie/roadmapCelebrate.json'),
-  fortressReveal: () => import('./assets/lottie/fortressReveal.json')
+  foundationReveal: () => import('./assets/lottie/foundationReveal.json')
 };
 
 const RemoteLottie = ({ src, loop = true, autoplay = true, className = '', style, onComplete }) => {
@@ -70,7 +84,7 @@ const JOURNEY_MODULES = [
     icon: '👤',
     time: '1 min',
     desc: 'Who are you building this foundation for?',
-    helper: 'This helps us understand your core responsibilities and what kind of safety net fits you best.',
+    helper: 'This helps us understand your core responsibilities and what kind of starting point fits you best.',
     questions: [
       {
         id: 'stage',
@@ -117,10 +131,10 @@ const JOURNEY_MODULES = [
   },
   {
     id: 'emergency',
-    title: 'Safety Net',
+    title: 'Emergency Fund',
     icon: '🏦',
     time: '1 min',
-    desc: 'Your first wall against surprises.',
+    desc: 'Your first cushion for surprises.',
     helper: 'An emergency fund is cash you can access easily. This helps gauge your short-term readiness.',
     questions: [
       {
@@ -138,10 +152,10 @@ const JOURNEY_MODULES = [
   },
   {
     id: 'protection',
-    title: 'The Shield',
+    title: 'Protection Review',
     icon: '🛡️',
     time: '1 min',
-    desc: 'Checking your cover against life risks.',
+    desc: 'Checking your current protection setup.',
     helper: 'This helps us identify if there are any gaps between what you have and what your family might need.',
     questions: [
       {
@@ -335,17 +349,293 @@ const ScoreRing = ({ score, colorClass }) => {
   );
 };
 
-const CalibratingScorePlaceholder = () => (
-  <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
-    <div className="absolute inset-0 rounded-full border-[8px] border-slate-100" />
-    <div className="absolute inset-0 rounded-full border-[8px] border-transparent border-t-indigo-500 border-r-emerald-400 animate-spin" />
-    <div className="absolute inset-4 rounded-full bg-white shadow-inner blur-[1px]" />
+const InitialEstimateScorePlaceholder = () => (
+  <div className="relative w-32 h-32 mx-auto flex items-center justify-center" aria-label="Overall score will be personalized after the final review step">
+    <svg className="w-full h-full drop-shadow-sm" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="38" className="stroke-slate-100" strokeWidth="7" fill="none" />
+      <circle cx="50" cy="50" r="38" className="stroke-slate-300" strokeWidth="7" fill="none" strokeLinecap="round" strokeDasharray="5 8" />
+    </svg>
+    <div className="absolute inset-4 rounded-full bg-white shadow-inner" />
     <div className="absolute inset-0 flex flex-col items-center justify-center">
-      <span className="text-4xl font-extrabold text-slate-300 tracking-tight blur-sm">68</span>
-      <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 animate-pulse">Calculating</span>
+      <span className="text-4xl font-extrabold text-slate-300 tracking-tight">??</span>
+      <span className="mt-1 text-[10px] font-bold uppercase tracking-wider text-indigo-500">Personalize</span>
     </div>
   </div>
 );
+
+const STATUS_TONES = {
+  rose: {
+    iconWrap: 'bg-white/20 text-white ring-white/25 shadow-rose-950/20',
+    badge: 'bg-red-800 text-white shadow-lg shadow-red-950/25',
+    accent: 'border-white/20',
+    slide: 'bg-gradient-to-br from-red-950 via-red-900 to-rose-950',
+    text: 'text-white',
+    muted: 'text-rose-50/90',
+    softPanel: 'bg-white/10 ring-white/15'
+  },
+  amber: {
+    iconWrap: 'bg-white/20 text-white ring-white/25 shadow-amber-950/20',
+    badge: 'bg-orange-800 text-white shadow-lg shadow-orange-950/25',
+    accent: 'border-white/20',
+    slide: 'bg-gradient-to-br from-orange-950 via-orange-800 to-amber-950',
+    text: 'text-white',
+    muted: 'text-amber-50/90',
+    softPanel: 'bg-white/15 ring-white/15'
+  },
+  indigo: {
+    iconWrap: 'bg-white/20 text-white ring-white/25 shadow-indigo-950/20',
+    badge: 'bg-indigo-800 text-white shadow-lg shadow-indigo-950/25',
+    accent: 'border-white/20',
+    slide: 'bg-gradient-to-br from-indigo-950 via-indigo-900 to-slate-950',
+    text: 'text-white',
+    muted: 'text-indigo-50/90',
+    softPanel: 'bg-white/10 ring-white/15'
+  },
+  emerald: {
+    iconWrap: 'bg-white/20 text-white ring-white/25 shadow-emerald-950/20',
+    badge: 'bg-emerald-800 text-white shadow-lg shadow-emerald-950/25',
+    accent: 'border-white/20',
+    slide: 'bg-gradient-to-br from-emerald-950 via-green-900 to-teal-950',
+    text: 'text-white',
+    muted: 'text-emerald-50/90',
+    softPanel: 'bg-white/10 ring-white/15'
+  },
+  purple: {
+    iconWrap: 'bg-white/20 text-white ring-white/25 shadow-purple-950/20',
+    badge: 'bg-purple-800 text-white shadow-lg shadow-purple-950/25',
+    accent: 'border-white/20',
+    slide: 'bg-gradient-to-br from-purple-950 via-violet-900 to-fuchsia-950',
+    text: 'text-white',
+    muted: 'text-purple-50/90',
+    softPanel: 'bg-white/10 ring-white/15'
+  },
+  brown: {
+    iconWrap: 'bg-white/20 text-white ring-white/25 shadow-stone-950/20',
+    badge: 'bg-stone-800 text-white shadow-lg shadow-stone-950/25',
+    accent: 'border-white/20',
+    slide: 'bg-gradient-to-br from-stone-950 via-amber-950 to-neutral-950',
+    text: 'text-white',
+    muted: 'text-stone-100/90',
+    softPanel: 'bg-white/10 ring-white/15'
+  },
+  slate: {
+    iconWrap: 'bg-white/20 text-white ring-white/25 shadow-slate-950/20',
+    badge: 'bg-slate-700 text-white shadow-lg shadow-slate-950/25',
+    accent: 'border-white/20',
+    slide: 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-950',
+    text: 'text-white',
+    muted: 'text-slate-100/90',
+    softPanel: 'bg-white/10 ring-white/15'
+  },
+  navy: {
+    iconWrap: 'bg-emerald-400/20 text-emerald-100 ring-emerald-300/25 shadow-emerald-950/20',
+    badge: 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/25',
+    accent: 'border-white/10',
+    slide: 'bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950',
+    text: 'text-white',
+    muted: 'text-slate-200/90',
+    softPanel: 'bg-white/10 ring-white/15'
+  }
+};
+
+const getPreviewTone = (status, title = '') => {
+  if (title.includes('Emergency Fund')) return 'rose';
+  if (title.includes('Health Costs')) return 'emerald';
+  if (title.includes('Family Support')) return 'purple';
+  if (title.includes('Cash Flow')) return 'indigo';
+  if (title.includes('Debt')) return 'brown';
+  if (['Needs Attention', 'Missing Layer', 'Needs Review'].includes(status)) return 'rose';
+  if (['Room to Grow', 'Watch Area', 'Getting There'].includes(status)) return 'amber';
+  if (['Has Some Cover', 'Moderate'].includes(status)) return 'indigo';
+  if (['Well Protected', 'Stable'].includes(status)) return 'emerald';
+  return 'slate';
+};
+
+const getPreviewIcon = (title) => {
+  if (title.includes('Health')) return HeartPulse;
+  if (title.includes('Family')) return UserRoundCog;
+  if (title.includes('Unexpected') || title.includes('Emergency')) return Landmark;
+  if (title.includes('Cash')) return Banknote;
+  if (title.includes('Debt')) return WalletCards;
+  return UserRoundCog;
+};
+
+const mapPreviewToCarouselCard = (item) => {
+  const title = item.title === 'Unexpected Expenses' ? 'Emergency Fund' : item.title;
+  const tone = getPreviewTone(item.status, title);
+
+  return {
+    id: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    title,
+    status: item.status,
+    statusTone: tone,
+    icon: getPreviewIcon(title),
+    shortText: item.shortText || item.desc,
+    answerPreview: item.answerPreview,
+    answerTopic: item.answerTopic || title.toLowerCase(),
+    detail: item.detail || item.desc,
+    whyItMatters:
+      item.whyItMatters ||
+      (title === 'Major Health Event'
+        ? 'Medical costs can affect savings, monthly cash flow, and family plans.'
+        : title === 'Family Backup Plan'
+          ? 'A backup plan helps protect the people who rely on your income.'
+          : 'A stronger cash buffer can make unexpected costs easier to absorb.'),
+    nextStepHint: item.nextStepHint || 'The final review step helps make your result and options more personal.'
+  };
+};
+
+const buildPreviewCards = (data, includePersonalizationCard = true) => {
+  const cards = data.pressurePoints.map(mapPreviewToCarouselCard);
+
+  if (!includePersonalizationCard) {
+    return cards;
+  }
+
+  return [...cards, {
+    id: 'personalize-options',
+    title: 'Ready to Make It Personal?',
+    status: 'Final step',
+    statusTone: 'navy',
+    icon: Sprout,
+    shortText: 'Complete the last part to turn this preview into your full result.',
+    detail: 'This final part helps turn your preview into a more personal result. It is not an application, and no payment is required.',
+    whyItMatters:
+      'Age helps estimate possible ranges more realistically. Focus helps match your main goal. Budget comfort helps avoid options that do not fit your monthly comfort level.',
+    nextStepHint: 'Age · Focus · Budget',
+    isCta: true
+  }];
+};
+
+const PreviewCarouselCard = ({ card, isActive, isFlipped, onToggle, onPersonalize, className = 'h-[23.5rem]' }) => {
+  const Icon = card.icon;
+  const tone = STATUS_TONES[card.statusTone] || STATUS_TONES.slate;
+  const handleFaceKeyDown = (event) => {
+    if (card.isCta) return;
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onToggle();
+    }
+  };
+  const handleBackClick = (event) => {
+    if (card.isCta) return;
+
+    if (event.target.closest('button')) return;
+
+    onToggle();
+  };
+
+  return (
+    <div className={`preview-card-shell ${className}`}>
+      <div className={`preview-card-inner h-full ${isFlipped ? 'is-flipped' : ''}`}>
+        <div
+          role={card.isCta ? undefined : 'button'}
+          className={`preview-card-face preview-card-slide flex h-full w-full flex-col rounded-3xl border ${tone.accent} ${tone.slide} p-5 text-left shadow-xl transition ${card.isCta ? '' : 'cursor-pointer'} ${
+            isActive ? 'shadow-slate-900/20' : 'opacity-80'
+          }`}
+          onClick={card.isCta ? undefined : onToggle}
+          onKeyDown={handleFaceKeyDown}
+          aria-label={card.isCta ? undefined : `${card.title}. ${isFlipped ? 'Show preview' : 'View details'}`}
+          aria-expanded={card.isCta ? undefined : isFlipped}
+          tabIndex={card.isCta || isFlipped ? -1 : 0}
+        >
+          <div className="relative z-10 flex items-start justify-between gap-3">
+            <div className={`preview-card-icon flex h-20 w-20 items-center justify-center rounded-3xl shadow-2xl ring-1 ${tone.iconWrap}`}>
+              <Icon className="h-10 w-10" strokeWidth={2.2} aria-hidden="true" />
+            </div>
+            <span className={`rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ring-1 ${tone.badge}`}>{card.status}</span>
+          </div>
+          <div className="relative z-10 mt-9 flex-1">
+            <h4 className={`text-3xl font-black leading-[1.02] tracking-tight ${tone.text}`}>{card.title}</h4>
+            <p className={`mt-4 max-w-[16rem] text-sm font-semibold leading-relaxed ${tone.muted}`}>{card.shortText}</p>
+            {card.answerPreview && (
+              <div className={`mt-4 rounded-2xl p-3 ring-1 ${tone.softPanel}`}>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-white/60">Your answer on {card.answerTopic}</p>
+                <p className={`mt-1 text-sm font-extrabold leading-snug ${tone.text}`}>{card.answerPreview}</p>
+              </div>
+            )}
+          </div>
+          <div className="relative z-10 mt-5 border-t border-white/15 pt-4">
+            {card.isCta ? (
+              <div className="space-y-3">
+                <div className={`rounded-2xl px-4 py-3 text-center text-xs font-extrabold uppercase tracking-[0.18em] ring-1 ${tone.softPanel} ${tone.muted}`}>
+                  {card.nextStepHint}
+                </div>
+                <button
+                  type="button"
+                  onClick={onPersonalize}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400"
+                >
+                  Complete My Review
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <span className={`flex items-center justify-between text-xs font-extrabold ${tone.muted}`}>
+                <span className="flex items-center gap-1.5">
+                  <Info className="h-4 w-4" aria-hidden="true" />
+                  Tap to reveal details
+                </span>
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div
+          role={card.isCta ? undefined : 'button'}
+          className={`preview-card-face preview-card-back preview-card-slide flex h-full w-full flex-col rounded-3xl border ${tone.accent} ${tone.slide} p-5 text-left shadow-xl shadow-slate-900/20 ${card.isCta ? '' : 'cursor-pointer'}`}
+          onClick={handleBackClick}
+          onKeyDown={handleFaceKeyDown}
+          tabIndex={!card.isCta && isFlipped ? 0 : -1}
+          aria-label={card.isCta ? undefined : `Back to ${card.title} preview`}
+          aria-hidden={!isFlipped}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h4 className={`text-lg font-extrabold leading-tight ${tone.text}`}>{card.title}</h4>
+              <span className={`mt-2 inline-flex rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider ring-1 ${tone.badge}`}>{card.status}</span>
+            </div>
+            <button
+              type="button"
+              onClick={onToggle}
+              onKeyDown={(event) => event.stopPropagation()}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20"
+              aria-label={`Back to ${card.title} preview`}
+              tabIndex={isFlipped ? 0 : -1}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div className="mt-5 space-y-4 overflow-y-auto pr-1">
+            <p className={`text-sm font-semibold leading-relaxed ${tone.muted}`}>{card.detail}</p>
+            <div className={`rounded-2xl p-4 ring-1 ${tone.softPanel}`}>
+              <p className="text-[10px] font-extrabold uppercase tracking-wider text-white/60">Why it matters</p>
+              <p className={`mt-1 text-sm font-semibold leading-relaxed ${tone.muted}`}>{card.whyItMatters}</p>
+            </div>
+            <div className={`rounded-xl p-3 ring-1 ${tone.softPanel}`}>
+              <p className={`text-xs font-extrabold leading-relaxed ${tone.muted}`}>{card.nextStepHint}</p>
+            </div>
+          </div>
+
+          {card.isCta && (
+            <button
+              type="button"
+              onClick={onPersonalize}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400"
+              tabIndex={isFlipped ? 0 : -1}
+            >
+              Complete My Review
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const CopyIcon = ({ className = 'h-4 w-4' }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -368,7 +658,7 @@ const AnalyzingScreen = ({ onComplete }) => {
   const [text, setText] = useState('Checking your cash flow layer...');
 
   useEffect(() => {
-    const t1 = setTimeout(() => setText('Reviewing your safety net...'), 1000);
+    const t1 = setTimeout(() => setText('Reviewing your foundation...'), 1000);
     const t2 = setTimeout(() => setText('Matching goals with next steps...'), 2200);
     const t3 = setTimeout(() => onComplete(), 3500);
 
@@ -387,7 +677,7 @@ const AnalyzingScreen = ({ onComplete }) => {
           <Compass className="h-10 w-10 text-white" strokeWidth={2.2} />
         </div>
       </div>
-      <h2 className="text-2xl font-bold mb-3 tracking-tight">Building Your Fortress</h2>
+      <h2 className="text-2xl font-bold mb-3 tracking-tight">Preparing Your Foundation Map</h2>
       <p className="text-slate-300 font-medium animate-pulse-soft">{text}</p>
     </div>
   );
@@ -395,8 +685,60 @@ const AnalyzingScreen = ({ onComplete }) => {
 
 const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubmitted, celebrationActive, scoreRevealed }) => {
   const [isNaturalCtaVisible, setIsNaturalCtaVisible] = useState(false);
+  const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
+  const [flippedCardId, setFlippedCardId] = useState(null);
   const dashboardScrollRef = useRef(null);
   const naturalCtaRef = useRef(null);
+  const carouselRef = useRef(null);
+  const previewCards = useMemo(() => buildPreviewCards(data, !scoreRevealed), [data, scoreRevealed]);
+  const activeCard = previewCards[activeCarouselIndex] || previewCards[0];
+  const transitionToPersonalization = () => onTransitionToQuote(data.cta);
+
+  const scrollToCard = (index) => {
+    const scrollElement = carouselRef.current;
+    const cardCount = previewCards.length;
+    const nextIndex = Math.max(0, Math.min(cardCount - 1, index));
+
+    if (!scrollElement) {
+      setActiveCarouselIndex(nextIndex);
+      return;
+    }
+
+    const target = scrollElement.children[nextIndex];
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+
+    setActiveCarouselIndex(nextIndex);
+    setFlippedCardId(null);
+  };
+
+  const handleCarouselScroll = () => {
+    const scrollElement = carouselRef.current;
+
+    if (!scrollElement) return;
+
+    const cardWidth = scrollElement.firstElementChild?.getBoundingClientRect().width || 1;
+    const gap = 12;
+    const nextIndex = Math.round(scrollElement.scrollLeft / (cardWidth + gap));
+    const boundedIndex = Math.max(0, Math.min(previewCards.length - 1, nextIndex));
+
+    setActiveCarouselIndex((currentIndex) => {
+      if (currentIndex !== boundedIndex) {
+        setFlippedCardId(null);
+      }
+
+      return boundedIndex;
+    });
+  };
+
+  const toggleCard = (card) => {
+    if (activeCard?.id !== card.id) {
+      return;
+    }
+
+    setFlippedCardId((currentId) => (currentId === card.id ? null : card.id));
+  };
 
   useEffect(() => {
     const scrollElement = dashboardScrollRef.current;
@@ -421,9 +763,100 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubm
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    setActiveCarouselIndex(0);
+    setFlippedCardId(null);
+  }, [previewCards.length]);
+
+  if (!scoreRevealed) {
+    const storyProgress = previewCards.length > 0 ? ((activeCarouselIndex + 1) / previewCards.length) * 100 : 0;
+
+    return (
+      <div className="h-full bg-slate-950 relative overflow-hidden text-white">
+        <CelebrationOverlay
+          active={celebrationActive}
+          src={LOTTIE_URLS.foundationReveal}
+          className="bg-slate-950/70 backdrop-blur-xl [&>div]:scale-125 [&>div]:opacity-100 [&>div]:drop-shadow-[0_28px_60px_rgba(255,255,255,0.28)]"
+        />
+
+        <div className="absolute inset-x-0 top-0 z-20 px-5 pt-[calc(env(safe-area-inset-top)+1rem)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-white/55">What We Noticed</p>
+              <h1 className="mt-1 text-lg font-extrabold tracking-tight text-white">Your Profile Is Ready</h1>
+            </div>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold text-white/75 ring-1 ring-white/15">
+              {activeCarouselIndex + 1} of {previewCards.length}
+            </span>
+          </div>
+
+          <div className="mt-4 grid gap-1.5" style={{ gridTemplateColumns: `repeat(${previewCards.length}, minmax(0, 1fr))` }}>
+            {previewCards.map((card, idx) => (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => scrollToCard(idx)}
+                className="h-1.5 overflow-hidden rounded-full bg-white/18"
+                aria-label={`Show preview card ${idx + 1} of ${previewCards.length}`}
+                aria-current={idx === activeCarouselIndex ? 'true' : undefined}
+              >
+                <span
+                  className={`block h-full rounded-full transition-all duration-300 ${idx === activeCarouselIndex ? 'bg-white' : idx < activeCarouselIndex ? 'bg-white/65' : 'bg-transparent'}`}
+                  style={{ width: idx === activeCarouselIndex ? `${storyProgress > 0 ? 100 : 0}%` : '100%' }}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div
+          ref={carouselRef}
+          onScroll={handleCarouselScroll}
+          className="story-carousel hide-scrollbar flex h-full snap-x snap-mandatory gap-0 overflow-x-auto"
+          role="region"
+          aria-label="Initial analysis story carousel"
+        >
+          {previewCards.map((card, idx) => (
+            <div key={card.id} className="flex h-full w-full shrink-0 snap-center px-5 pb-[calc(env(safe-area-inset-bottom)+1.5rem)] pt-[calc(env(safe-area-inset-top)+6.6rem)]">
+              <PreviewCarouselCard
+                card={card}
+                isActive={activeCarouselIndex === idx}
+                isFlipped={flippedCardId === card.id}
+                onToggle={() => toggleCard(card)}
+                onPersonalize={transitionToPersonalization}
+                className="h-full min-h-[31rem] w-full"
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 z-20 flex -translate-y-1/2 items-center justify-between px-3">
+          <button
+            type="button"
+            onClick={() => scrollToCard(activeCarouselIndex - 1)}
+            disabled={activeCarouselIndex === 0}
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/15 backdrop-blur transition hover:bg-white/15 disabled:opacity-30"
+            aria-label="Show previous preview card"
+          >
+            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToCard(activeCarouselIndex + 1)}
+            disabled={activeCarouselIndex === previewCards.length - 1}
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/15 backdrop-blur transition hover:bg-white/15 disabled:opacity-30"
+            aria-label="Show next preview card"
+          >
+            <ChevronRight className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-50 h-full relative overflow-hidden">
-      <CelebrationOverlay active={celebrationActive} src={LOTTIE_URLS.fortressReveal} className="bg-white/30 backdrop-blur-[2px]" />
+      <CelebrationOverlay active={celebrationActive} src={LOTTIE_URLS.foundationReveal} className="bg-white/30 backdrop-blur-[2px]" />
       <div ref={dashboardScrollRef} className="app-scroll h-full hide-scrollbar relative">
         <div className="bg-white px-6 pt-12 pb-10 rounded-b-[2.5rem] shadow-sm border-b border-slate-100 text-center relative z-10 shrink-0 animate-slide-up">
           {/* Share & Save icon buttons — relocated from bottom row */}
@@ -446,68 +879,120 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubm
             </button>
           </div>
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">
-            {scoreRevealed ? 'Your Financial Fortress' : 'Layer Analysis'}
+            {scoreRevealed ? 'Your Financial Foundation Map' : 'What We Noticed'}
           </h2>
 
         <div className="relative mx-auto w-40 h-40 mb-6">
           <div className="absolute inset-0 flex items-center justify-center">
-            {scoreRevealed ? <ScoreRing score={data.score} colorClass={data.scoreColor} /> : <CalibratingScorePlaceholder />}
+            {scoreRevealed ? <ScoreRing score={data.score} colorClass={data.scoreColor} /> : <InitialEstimateScorePlaceholder />}
           </div>
-          <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-2xl border-2 border-slate-50 z-20 transform translate-x-2 -translate-y-2">
-            {scoreRevealed ? data.persona.emoji : '🛡️'}
+          <div className="absolute top-0 right-0 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center border-2 border-slate-50 z-20 transform translate-x-2 -translate-y-2">
+            {scoreRevealed ? <span className="text-2xl">{data.persona.emoji}</span> : <UserRoundCog className="h-6 w-6 text-indigo-600" strokeWidth={2.2} aria-hidden="true" />}
           </div>
         </div>
 
         <h1 className="text-2xl font-extrabold text-slate-800 mb-2 tracking-tight">
-          {scoreRevealed ? data.persona.title : 'Analyzing your inputs...'}
+          {scoreRevealed ? data.persona.title : 'Your Profile Is Ready'}
         </h1>
         <p className="text-slate-500 text-sm leading-relaxed max-w-[300px] mx-auto font-medium">
           {scoreRevealed
             ? data.persona.subtitle
-            : 'We found a few vulnerabilities in your safety net. We need to calibrate your profile to calculate your exact score.'}
+            : 'We’ve reviewed your answers and found a few areas worth looking at.'}
         </p>
       </div>
 
         <div className="px-5 mt-6 mb-8 pb-[calc(env(safe-area-inset-bottom)+7.5rem)] space-y-4">
-        <h3 className="font-bold text-slate-800 px-1 text-sm">Quick Layer Preview</h3>
-
-        {data.threats.map((threat, idx) => (
-          <div
-            key={idx}
-            className="bg-white p-5 rounded-[1.5rem] shadow-sm border border-slate-100 flex gap-4 animate-slide-up"
-            style={{ animationDelay: `${idx * 0.1}s` }}
-          >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${threat.bgClass}`}>{threat.icon}</div>
-            <div className="flex-1">
-              <div className="flex justify-between items-start mb-1">
-                <h4 className="font-bold text-slate-800 text-sm">{threat.title}</h4>
-              </div>
-              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider mb-2 ${threat.badgeClass}`}>
-                {threat.status}
-              </span>
-              <p className="text-xs text-slate-500 leading-relaxed">{threat.desc}</p>
-            </div>
+        <div className="flex items-end justify-between gap-3 px-1">
+          <div>
+            <h3 className="font-bold text-slate-800 text-sm">Quick Preview</h3>
+            {!scoreRevealed && <p className="mt-1 text-xs font-medium text-slate-400">Swipe to preview. Tap a card for details.</p>}
           </div>
-        ))}
+          <span className="text-[11px] font-bold text-slate-400">
+            {activeCarouselIndex + 1} of {previewCards.length}
+          </span>
+        </div>
+
+        <div className="-mx-5">
+          <div
+            ref={carouselRef}
+            onScroll={handleCarouselScroll}
+            className="preview-carousel hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-1 pt-2"
+            role="region"
+            aria-label="Quick layer preview carousel"
+          >
+            {previewCards.map((card, idx) => (
+              <div key={card.id} className="w-[84%] max-w-[22rem] shrink-0 snap-center">
+                <PreviewCarouselCard
+                  card={card}
+                  isActive={activeCarouselIndex === idx}
+                  isFlipped={flippedCardId === card.id}
+                  onToggle={() => toggleCard(card)}
+                  onPersonalize={transitionToPersonalization}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between px-1">
+          <button
+            type="button"
+            onClick={() => scrollToCard(activeCarouselIndex - 1)}
+            disabled={activeCarouselIndex === 0}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 disabled:opacity-35"
+            aria-label="Show previous preview card"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <div className="flex items-center gap-1.5" aria-label="Carousel position">
+            {previewCards.map((card, idx) => (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => scrollToCard(idx)}
+                className={`h-2 rounded-full transition-all ${idx === activeCarouselIndex ? 'w-6 bg-indigo-600' : 'w-2 bg-slate-300'}`}
+                aria-label={`Show preview card ${idx + 1} of ${previewCards.length}`}
+                aria-current={idx === activeCarouselIndex ? 'true' : undefined}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => scrollToCard(activeCarouselIndex + 1)}
+            disabled={activeCarouselIndex === previewCards.length - 1}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 disabled:opacity-35"
+            aria-label="Show next preview card"
+          >
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
 
           <div ref={naturalCtaRef} className="bg-slate-800 rounded-[1.5rem] p-6 shadow-md text-white mt-8 relative overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
           <div className="relative z-10">
-            <span className="text-3xl mb-3 block">{scoreRevealed ? '📩' : data.cta.icon}</span>
+            <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-white">
+              {scoreRevealed ? '📩' : <SlidersHorizontal className="h-6 w-6" strokeWidth={2.2} aria-hidden="true" />}
+            </span>
             <h3 className="text-lg font-bold mb-2 tracking-tight">
-              {scoreRevealed ? 'Your calibrated roadmap is ready.' : data.cta.headline}
+              {scoreRevealed ? 'Your personalized roadmap is ready.' : 'Ready to make it personal?'}
             </h3>
             <p className="text-sm text-slate-300 mb-6 leading-relaxed font-medium">
-              {scoreRevealed ? 'You can revisit the submitted roadmap summary anytime from here.' : data.cta.hook}
+              {scoreRevealed
+                ? 'You can revisit the submitted roadmap summary anytime from here.'
+                : 'Complete the last part to turn this preview into your full result.'}
             </p>
-            {!scoreRevealed && <p className="mb-3 text-center text-xs font-semibold text-slate-300">Takes ~30 seconds.</p>}
 
             <Button
-              onClick={() => (scoreRevealed ? onViewSubmitted() : onTransitionToQuote(data.cta))}
+              onClick={() => (scoreRevealed ? onViewSubmitted() : transitionToPersonalization())}
               variant="emerald"
-              className="cta-quick-wins-motion mb-3 border border-emerald-200/70 text-white"
+              className="mb-3 !rounded-xl border border-emerald-200/70 !bg-emerald-500 text-white !shadow-lg !shadow-emerald-500/20 hover:!bg-emerald-600"
             >
-                {scoreRevealed ? 'View Sent Roadmap' : 'Calibrate My Score'}
+                {scoreRevealed ? 'View Sent Roadmap' : (
+                  <>
+                    <SlidersHorizontal className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+                    Complete My Review
+                  </>
+                )}
             </Button>
 
             <button
@@ -525,11 +1010,16 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubm
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent animate-slide-up">
           <div className="pointer-events-auto">
             <Button
-              onClick={() => (scoreRevealed ? onViewSubmitted() : onTransitionToQuote(data.cta))}
+              onClick={() => (scoreRevealed ? onViewSubmitted() : transitionToPersonalization())}
               variant="emerald"
-              className="cta-quick-wins-motion border border-emerald-200/70 text-white"
+              className="!rounded-xl border border-emerald-200/70 !bg-emerald-500 text-white !shadow-lg !shadow-emerald-500/20 hover:!bg-emerald-600"
             >
-              {scoreRevealed ? 'View Sent Roadmap' : 'Calibrate My Score'}
+              {scoreRevealed ? 'View Sent Roadmap' : (
+                <>
+                  <SlidersHorizontal className="h-4 w-4" strokeWidth={2.2} aria-hidden="true" />
+                  Complete My Review
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -730,7 +1220,7 @@ function App() {
     });
   };
 
-  const calculateFortressData = useMemo(() => {
+  const calculateFoundationData = useMemo(() => {
     let score = 0;
     const breakdown = { cashflow: 0, emergency: 0, protection: 0, goals: 0 };
 
@@ -773,18 +1263,18 @@ function App() {
     score = breakdown.cashflow + breakdown.emergency + breakdown.protection + breakdown.goals;
 
     let persona = {
-      title: 'Building Phase',
+      title: 'Building Your Starting Point',
       emoji: '🧱',
-      subtitle: 'You have a starting point, but your layers can be strengthened.'
+      subtitle: 'You have a starting point, with a few areas that could be stronger.'
     };
 
     let scoreColor = 'stroke-amber-400';
 
     if (score >= 80) {
       persona = {
-        title: 'Strong Foundation',
+        title: 'Looking Stable',
         emoji: '🏰',
-        subtitle: 'Looking good! Your base is well-rounded and stable.'
+        subtitle: 'Looking good. Your foundation looks well-rounded and stable.'
       };
       scoreColor = 'stroke-emerald-500';
     } else if (score >= 55) {
@@ -797,56 +1287,97 @@ function App() {
     }
 
     const hasDeps = answers.dependents.length > 0 && !answers.dependents.includes('none');
-    const threats = [];
+    const pressurePoints = [];
+    const emergencyAnswerText =
+      {
+        1: 'Less than 1 month',
+        2: '1 to 3 months',
+        3: '3 to 6 months',
+        4: 'More than 6 months'
+      }[answers.emergencyFund] || 'Not provided';
+    const protectionLabels = {
+      hmo: 'Company HMO / Health Card',
+      health_ins: 'Personal Health Insurance',
+      life_ins: 'Life Insurance',
+      critical: 'Critical Illness Coverage',
+      none: 'None yet'
+    };
+    const dependentLabels = {
+      kids: 'Children',
+      spouse: 'Spouse/Partner',
+      parents: 'Parents/Siblings',
+      none: 'No one right now'
+    };
+    const selectedProtectionText = answers.protection.length
+      ? answers.protection.map((item) => protectionLabels[item] || item).join(', ')
+      : 'Not provided';
+    const selectedDependentsText = answers.dependents.length
+      ? answers.dependents.map((item) => dependentLabels[item] || item).join(', ')
+      : 'Not provided';
 
     if (answers.emergencyFund < 3) {
-      threats.push({
-        title: 'Unexpected Expenses',
-        icon: '💸',
-        status: 'Room to Grow',
-        bgClass: 'bg-amber-50 text-amber-500',
-        badgeClass: 'bg-amber-100 text-amber-700',
-        desc: 'Your savings are starting to build, but a sudden repair could stress your current cash flow.'
+      pressurePoints.push({
+        title: 'Emergency Fund',
+        status: 'Getting There',
+        desc: 'Your savings are starting to build, but a surprise expense could affect your current cash flow.',
+        shortText: 'Your cash buffer may need more room for surprise expenses.',
+        answerPreview: emergencyAnswerText,
+        answerTopic: 'emergency savings',
+        detail:
+          'Your answers suggest your emergency fund may still be in progress. This does not mean you are behind; it simply means this area may be worth reviewing before building your options.',
+        whyItMatters: 'A cash buffer can protect monthly bills, savings goals, and everyday routines when unexpected costs show up.'
       });
     } else {
-      threats.push({
-        title: 'Unexpected Expenses',
-        icon: '🏦',
-        status: 'Well Protected',
-        bgClass: 'bg-emerald-50 text-emerald-500',
-        badgeClass: 'bg-emerald-100 text-emerald-700',
-        desc: 'Your rainy day fund is strong enough to handle short-term income pauses gracefully.'
+      pressurePoints.push({
+        title: 'Emergency Fund',
+        status: 'Looking Stable',
+        desc: 'Your rainy day fund is strong enough to handle short-term income pauses gracefully.',
+        shortText: 'Your emergency fund looks like a helpful first layer.',
+        answerPreview: emergencyAnswerText,
+        answerTopic: 'emergency savings',
+        detail:
+          'Your answers suggest you have a practical cash buffer in place. The next step is making sure the rest of your foundation fits around it.',
+        whyItMatters: 'A stable emergency fund can reduce the need to borrow or interrupt long-term plans.'
       });
     }
 
     if (!answers.protection.includes('health_ins') && !answers.protection.includes('critical') && !answers.protection.includes('hmo')) {
-      threats.push({
-        title: 'Major Health Event',
-        icon: '🏥',
-        status: 'Needs Attention',
-        bgClass: 'bg-rose-50 text-rose-500',
-        badgeClass: 'bg-rose-100 text-rose-700',
-        desc: 'A major medical event could tap into savings meant for other goals. A health shield adds a crucial layer.'
+      pressurePoints.push({
+        title: 'Health Costs',
+        status: 'Worth Reviewing',
+        desc: 'A major medical expense could affect savings meant for other goals. A health plan can add a useful layer.',
+        shortText: 'This area may have a high impact on your finances.',
+        answerPreview: selectedProtectionText,
+        answerTopic: 'health and protection coverage',
+        detail:
+          'Your answers suggest limited protection for health-related costs. This does not mean something is wrong; it simply means this area may need a closer look before building your options.',
+        whyItMatters: 'Medical costs can affect savings, monthly cash flow, and family plans.'
       });
     } else {
-      threats.push({
-        title: 'Major Health Event',
-        icon: '🩺',
-        status: 'Has Some Cover',
-        bgClass: 'bg-indigo-50 text-indigo-500',
-        badgeClass: 'bg-indigo-100 text-indigo-700',
-        desc: 'You have health coverage in place to help defend your savings against medical costs.'
+      pressurePoints.push({
+        title: 'Health Costs',
+        status: 'Getting There',
+        desc: 'You have health coverage in place to help support your savings if medical costs come up.',
+        shortText: 'You already have a health-related protection layer.',
+        answerPreview: selectedProtectionText,
+        answerTopic: 'health and protection coverage',
+        detail:
+          'Your answers show some health coverage is already in place. The final review step helps check whether your options should focus on strengthening, balancing, or maintaining this layer.',
+        whyItMatters: 'Health protection can help preserve savings and keep family plans steadier during medical events.'
       });
     }
 
     if (hasDeps && !answers.protection.includes('life_ins')) {
-      threats.push({
-        title: 'Family Backup Plan',
-        icon: '👨‍👩‍👧‍👦',
-        status: 'Missing Layer',
-        bgClass: 'bg-rose-50 text-rose-500',
-        badgeClass: 'bg-rose-100 text-rose-700',
-        desc: 'People rely on your income engine. Life insurance acts as a safety net if that engine stops.'
+      pressurePoints.push({
+        title: 'Family Support',
+        status: 'Worth Reviewing',
+        desc: 'People may rely on your income. A backup plan can help support them if income is interrupted.',
+        shortText: 'Your income may support people beyond yourself.',
+        answerPreview: selectedDependentsText,
+        answerTopic: 'family support',
+        detail:
+          'Your answers suggest others may rely on your income, while a family backup layer may still need review. This is simply a planning signal, not a judgment.',
+        whyItMatters: 'A backup plan helps protect family expenses, education plans, and essential bills if income is interrupted.'
       });
     }
 
@@ -854,39 +1385,39 @@ function App() {
 
     if (hasDeps && !answers.protection.includes('life_ins')) {
       cta = {
-        headline: 'You have people counting on you.',
-        hook: 'You work hard for your family. Checking out a backup plan helps ensure they are supported no matter what.',
-        buttonText: 'Check My Family Quick Wins',
-        wizardHeadline: "Let's check your family quick wins.",
-        icon: '🛡️'
+        headline: 'Your family support plan is worth reviewing.',
+        hook: 'You work hard for your family. Reviewing a backup plan can help keep their needs in view.',
+        buttonText: 'Complete My Review',
+        wizardHeadline: "Let's complete your review.",
+        icon: '🧭'
       };
     } else if (protCount === 0) {
       cta = {
-        headline: 'Build your first safety shield.',
-        hook: "Your savings help with today, but a protection plan shields your tomorrow. Let's find beginner-friendly options.",
-        buttonText: 'Find My Foundation Quick Wins',
-        wizardHeadline: "Let's find your foundation quick wins.",
+        headline: 'Build your first foundation layer.',
+        hook: "Your savings help with today, and a basic protection plan may help support your next step. Let's review beginner-friendly options.",
+        buttonText: 'Complete My Review',
+        wizardHeadline: "Let's complete your review.",
         icon: '🌱'
       };
     } else if (answers.priorities.includes('invest') && score < 60) {
       cta = {
-        headline: 'Protect before you grow.',
-        hook: 'Your investment goals are safer when your basic protection layer is solid. Let\'s review your balance.',
-        buttonText: 'Find My Protection Quick Wins',
-        wizardHeadline: "Let's find your protection quick wins.",
+        headline: 'Review your foundation before you grow.',
+        hook: 'Your investment goals may feel easier to plan when your basic foundation is clear. Let\'s review your balance.',
+        buttonText: 'Complete My Review',
+        wizardHeadline: "Let's complete your review.",
         icon: '📈'
       };
     } else {
       cta = {
         headline: 'Keep building your momentum.',
-        hook: 'Let\'s review a personalized strategy to align your current setup with your future goals.',
-        buttonText: 'Find My Easiest Quick Wins',
-        wizardHeadline: "Let's find your easiest quick wins.",
+        hook: 'Let\'s review a personalized starting point that connects your current setup with your future goals.',
+        buttonText: 'Complete My Review',
+        wizardHeadline: "Let's complete your review.",
         icon: '🧭'
       };
     }
 
-    return { score, breakdown, persona, scoreColor, threats, cta };
+    return { score, breakdown, persona, scoreColor, pressurePoints, cta };
   }, [answers]);
 
   const renderWelcome = () => (
@@ -921,7 +1452,7 @@ function App() {
 
     return (
       <div className="h-full flex flex-col bg-slate-50 relative overflow-hidden">
-        <CelebrationOverlay active={isFinalCelebrationActive} src={LOTTIE_URLS.roadmapCelebrate} className="bg-white/55 backdrop-blur-[2px] [&>div]:m-6 [&>div]:rounded-[2rem] [&>div]:bg-white/45 [&>div]:shadow-2xl [&>div]:ring-1 [&>div]:ring-white/70" />
+        <CelebrationOverlay active={isFinalCelebrationActive} src={LOTTIE_URLS.roadmapCelebrate} className="bg-slate-950/35 backdrop-blur-md [&>div]:m-6 [&>div]:rounded-[2rem] [&>div]:bg-white/35 [&>div]:shadow-2xl [&>div]:ring-1 [&>div]:ring-white/60" />
         <div className="bg-white px-6 pt-10 pb-6 rounded-b-[2rem] shadow-sm relative z-10 border-b border-slate-100 animate-slide-up">
           <h2 className="text-xl font-extrabold text-slate-800 mb-5">Your Profile Journey</h2>
           <div className="mb-2 flex justify-between items-end">
@@ -938,7 +1469,7 @@ function App() {
             <div className="bg-indigo-50 border border-indigo-100 rounded-[1.5rem] p-5 flex gap-4 items-start animate-fade-in shadow-sm">
               <span className="text-indigo-500 text-2xl shrink-0">💡</span>
               <p className="text-sm text-indigo-900 leading-relaxed font-medium">
-                Good start! Your profile shows you&apos;re already thinking ahead. Complete the remaining sections to unlock your full Financial Fortress.
+                Good start! Your profile shows you&apos;re already thinking ahead. Complete the remaining sections to view your full Financial Foundation.
               </p>
             </div>
           )}
@@ -946,7 +1477,7 @@ function App() {
           {JOURNEY_MODULES.map((mod, idx) => {
             const isComplete = completedModules.includes(mod.id);
             const isNext = !isComplete && (idx === 0 || completedModules.includes(JOURNEY_MODULES[idx - 1].id));
-            const isLocked = !isComplete && !isNext;
+            const isUnavailable = !isComplete && !isNext;
             const isRecentCompletion = completionFx.active && completionFx.moduleId === mod.id;
             const shouldPlayCheckAnimation = isComplete && !playedCheckAnimation[mod.id];
 
@@ -955,7 +1486,7 @@ function App() {
                 key={mod.id}
                 ref={isNext ? nextModuleRef : null}
                 onClick={() => {
-                  if (!isLocked && !isComplete) {
+                  if (!isUnavailable && !isComplete) {
                     setActiveModuleId(mod.id);
                     setModuleStartedAt((prev) => ({
                       ...prev,
@@ -1011,7 +1542,7 @@ function App() {
                     </svg>
                   </div>
                 )}
-                {isLocked && (
+                {isUnavailable && (
                   <div className="text-slate-300">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path
@@ -1031,7 +1562,7 @@ function App() {
           {completedModules.length === JOURNEY_MODULES.length && analyzeButtonReady && (
             <div ref={resultsCtaRef}>
               <Button onClick={() => setScreen('analyzing')} className="cta-results-motion border border-sky-200/70 text-white">
-                See My Results
+                See Where I Stand
               </Button>
             </div>
           )}
@@ -1208,7 +1739,7 @@ function App() {
           birthYear
         },
         quoteIntent,
-        scoreData: calculateFortressData,
+        scoreData: calculateFoundationData,
         moduleTimings
       };
 
@@ -1284,7 +1815,7 @@ function App() {
             <button onClick={prevStep} className="text-slate-400 hover:text-slate-600 font-medium text-sm flex items-center gap-1">
               ← Back
             </button>
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Calibration</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Personalization</span>
           </div>
           <div className="w-full bg-slate-100 h-1.5 rounded-full">
             <div
@@ -1297,13 +1828,13 @@ function App() {
         <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 hide-scrollbar">
           {quoteStep === 1 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-6">Calibrate your age range</h2>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-6">Add your age range</h2>
               <div className="bg-slate-100/80 p-3 rounded-xl mb-8 flex gap-3 items-start border border-slate-200/60">
                 <svg className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  Age helps us calibrate your score and prepare a more realistic beginner-friendly roadmap. This is kept strictly private.
+                  Age helps us personalize your score and prepare a more realistic beginner-friendly roadmap. This is kept strictly private.
                 </p>
               </div>
               <div className="space-y-6">
@@ -1372,7 +1903,7 @@ function App() {
             <div className="animate-fade-in">
               <h2 className="text-xl font-extrabold text-slate-800 mb-2">Pick Your Comfort Zone</h2>
               <p className="text-slate-500 text-sm mb-6 font-medium">
-                Pick a starting point that fits naturally into your routine. Nothing is locked in, and you can always adjust as you go.
+                Pick a starting point that fits naturally into your routine. Nothing is set, and you can always adjust as you go.
               </p>
               <div className="space-y-4">
                 {[
@@ -1558,7 +2089,7 @@ function App() {
         '5000+': '₱5,000+/month',
         unsure: 'a flexible starter range'
       }[id] || 'your selected range');
-    const scoreData = calculateFortressData;
+    const scoreData = calculateFoundationData;
     const budgetText = getBudgetText(quoteData.budget);
     const breakdownItems = [
       { label: 'Cash Flow & Income', value: scoreData.breakdown.cashflow, max: 25 },
@@ -1568,7 +2099,7 @@ function App() {
     ];
     const handleCopyShare = async () => {
       const shareText =
-        "Just used this free tool to check my financial safety net. It takes 30 seconds and doesn't ask for exact income. Highly recommend checking your blind spots: https://assess.lablibre.com";
+        "Just used this free tool to check my financial starting point. It takes a few minutes and doesn't ask for exact income: https://assess.lablibre.com";
 
       try {
         await navigator.clipboard.writeText(shareText);
@@ -1595,9 +2126,9 @@ function App() {
               {scoreData.persona.emoji}
             </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Your Fortress Score is {scoreData.score}/100</h2>
+          <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Your Financial Foundation Score is {scoreData.score}/100</h2>
           <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-[300px] mx-auto">
-            Calibration complete! Your beginner-friendly roadmap for {budgetText} is being finalized. We will send the exact next steps directly to your email.
+            Personalization complete. Your beginner-friendly roadmap for {budgetText} is being prepared, and we will send the next steps directly to your email.
           </p>
           <p className="mt-4 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-xs font-bold leading-relaxed text-emerald-100">
             Please note: Reviewing your options requires absolutely no commitment or payment.
@@ -1663,7 +2194,7 @@ function App() {
 
           <div className="pt-2 space-y-3 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <Button onClick={() => setScreen('dashboard')} variant="primary" className="py-3.5">
-              Back to My Fortress
+              Back to My Foundation Map
             </Button>
             <button
               type="button"
@@ -1709,7 +2240,7 @@ function App() {
         )}
         {screen === 'dashboard' && (
           <DashboardScreen
-            data={calculateFortressData}
+            data={calculateFoundationData}
             onTransitionToQuote={handleTransitionToQuote}
             onResetJourney={restartJourney}
             onViewSubmitted={() => setScreen('quote_teaser')}
