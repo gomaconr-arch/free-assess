@@ -12,6 +12,7 @@ import {
   KeyRound,
   Landmark,
   Lock,
+  MessageCircle,
   Shield,
   SlidersHorizontal,
   Sprout,
@@ -25,7 +26,6 @@ const Lottie = lazy(() => import('lottie-react'));
 const LOTTIE_URLS = {
   checkmark: 'checkmark',
   microCelebrate: 'microCelebrate',
-  roadmapCelebrate: 'roadmapCelebrate',
   foundationReveal: 'foundationReveal',
   success: 'checkmark'
 };
@@ -33,7 +33,6 @@ const LOTTIE_URLS = {
 const animationLoaders = {
   checkmark: () => import('./assets/lottie/checkmark.json'),
   microCelebrate: () => import('./assets/lottie/microCelebrate.json'),
-  roadmapCelebrate: () => import('./assets/lottie/roadmapCelebrate.json'),
   foundationReveal: () => import('./assets/lottie/foundationReveal.json')
 };
 
@@ -403,7 +402,7 @@ const SlideToSubmit = ({ disabled, isSubmitting, onSubmit }) => {
         aria-hidden="true"
       />
       <div className="absolute inset-0 flex items-center justify-center px-16 text-sm font-extrabold">
-        {isSubmitting ? 'Preparing your analysis...' : disabled ? 'Enter a valid email' : 'Slide to Submit'}
+        {isSubmitting ? 'Preparing your analysis...' : disabled ? 'Enter a valid number and email' : 'Agree and Reveal Score'}
       </div>
       <button
         type="button"
@@ -1561,11 +1560,9 @@ function App() {
   const renderHub = () => {
     const progress = (completedModules.length / JOURNEY_MODULES.length) * 100;
     const showMiniInsight = completedModules.length === 2 || completedModules.length === 3;
-    const isFinalCelebrationActive = completionFx.active && completionFx.final;
 
     return (
       <div className="h-full flex flex-col bg-slate-50 relative overflow-hidden">
-        <CelebrationOverlay active={isFinalCelebrationActive} src={LOTTIE_URLS.roadmapCelebrate} className="bg-slate-950/35 backdrop-blur-md [&>div]:w-screen md:[&>div]:w-full [&>div]:max-w-none [&>div]:bg-white/35 [&>div]:shadow-2xl [&>div]:ring-1 [&>div]:ring-white/60" />
         <div className="bg-white px-6 pt-10 pb-6 rounded-b-[2rem] shadow-sm relative z-10 border-b border-slate-100 animate-slide-up">
           <h2 className="text-xl font-extrabold text-slate-800 mb-5">Your Profile Journey</h2>
           <div className="mb-2 flex justify-between items-end">
@@ -1863,6 +1860,8 @@ function App() {
       updateAge();
       ageHoldTimerRef.current = window.setInterval(updateAge, 120);
     };
+    const currentAge = clampAge(quoteData.age);
+    const ageDigitColorClass = currentAge >= 50 ? 'text-rose-500' : currentAge >= 40 ? 'text-indigo-500' : 'text-emerald-500';
     const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(quoteData.email.trim());
 
     const submitLead = async (consentGranted = quoteData.consent) => {
@@ -2034,7 +2033,7 @@ function App() {
                     -
                   </button>
                   <div className="min-w-[7rem] rounded-[1.25rem] bg-slate-50 px-5 py-3 text-center ring-1 ring-slate-100">
-                    <div className="text-5xl font-black tracking-tight text-slate-900">{quoteData.age}</div>
+                    <div className={`text-5xl font-black tracking-tight transition-colors duration-200 ${ageDigitColorClass}`}>{quoteData.age}</div>
                     <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">years old</div>
                   </div>
                   <button
@@ -2054,7 +2053,7 @@ function App() {
                 <Lock className="h-3.5 w-3.5" aria-hidden="true" />
                 Kept safe and completely private.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 {lifeStageCards.map(({ id, title, subLabel, accentClass, titleClass, iconWrapClass, animationClass, Icon, SupportIcon }) => (
                   <div key={id} className="bg-white/90 border border-slate-100 rounded-xl p-5 flex flex-col items-center text-center shadow-sm opacity-95">
                     <div className={`relative mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${iconWrapClass}`}>
@@ -2111,7 +2110,7 @@ function App() {
                     title: 'Simple Start',
                     label: 'Below ₱1,500 / month',
                     daily: '~₱50/day',
-                    dailyBadgeColor: 'bg-emerald-100 text-emerald-800',
+                    dailyBadgeColor: 'bg-gray-100 text-light-gray-800',
                     desc: 'Perfect if you want to start building a safety net without feeling it in your wallet.',
                     support: 'Usually covers basic health emergencies or simple peace-of-mind protection.',
                     badge: null
@@ -2199,7 +2198,7 @@ function App() {
               <p className="mt-6 text-[11px] text-slate-400 font-medium text-center leading-relaxed px-4">
                 You can adjust this later. A higher range may allow more flexibility, stronger coverage, or added savings features depending on your profile.
               </p>
-              <p className="mt-3 text-xs text-slate-400 font-medium text-center">Zero payment required. No commitment.</p>
+              <p className="mt-3 text-xs text-red-800 text-slate-400 font-bold text-center">Zero payment required. No commitment.</p>
             </div>
           )}
 
@@ -2215,12 +2214,10 @@ function App() {
                 </div>
               </div>
               <h2 className="text-slate-900 font-extrabold text-2xl mb-2">Where to send your results?</h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-8">
-                We ask for the number to send SMS confirming it arrived.
-              </p>
+
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1">Full Name</label>
+                  <label className="block text-sm font-bold text-slate-700 mb-1">Your Name</label>
                   <input
                     type="text"
                     placeholder="Juan Dela Cruz"
@@ -2238,12 +2235,16 @@ function App() {
                     onChange={(e) => updateQuote('phone', e.target.value)}
                     className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-slate-800 focus:outline-none font-medium text-slate-700 shadow-sm"
                   />
+                  <p className="mt-2 flex items-center gap-2 text-slate-500 text-sm leading-relaxed mb-8">
+                    <MessageCircle className="h-4 w-4 shrink-0 text-indigo-500" aria-hidden="true" />
+                    We will send SMS confirming the result has arrived.
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1">Email Address</label>
                   <input
                     type="email"
-                    placeholder="juan@example.com"
+                    placeholder="juandelacruz@gmail.com"
                     value={quoteData.email}
                     onChange={(e) => updateQuote('email', e.target.value)}
                     className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-slate-800 focus:outline-none font-medium text-slate-700 shadow-sm"
@@ -2323,9 +2324,9 @@ function App() {
               {scoreData.persona.emoji}
             </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Your Financial Foundation Score is {scoreData.score}/100</h2>
+          <h2 className="text-2xl font-extrabold text-white mb-2 tracking-tight">Your score is {scoreData.score}/100</h2>
           <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-[300px] mx-auto">
-            Personalization complete. Your beginner-friendly roadmap for {budgetText} is being prepared, and we will send the next steps directly to your email.
+            Personalization complete. Your roadmap for {budgetText} is being prepared, and we will send the next steps directly to your email.
           </p>
           <p className="mt-4 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-xs font-bold leading-relaxed text-emerald-100">
             Please note: Reviewing your options requires absolutely no commitment or payment.
