@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.5.12 - 2026-06-24
+
+Prompt context:
+- Refine the personalization age step so the life-stage cards behave as a passive infographic while the tap-and-hold age stepper remains the primary input.
+
+Changes:
+- Restored the age tap-and-hold stepper with clamped age handling and timer cleanup.
+- Reworked the life-stage cards into subtle white infographic cards with emerald, indigo, and rose icon accents.
+- Kept the life-stage icon animations while removing heavy dark gradients that made the cards read as primary actions.
+- Moved the age selector above the infographic cards to keep the primary input visually dominant.
+- Applied the emerald action button style to the personalization form CTA.
+- Bumped project version for the age-step visual hierarchy and CTA refinement.
+
 ## 1.5.11 - 2026-06-19
 
 Prompt context:

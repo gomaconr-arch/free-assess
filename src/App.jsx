@@ -7,11 +7,16 @@ import {
   ChevronRight,
   Compass,
   HeartPulse,
+  Home,
   Info,
+  KeyRound,
   Landmark,
+  Lock,
+  Shield,
   SlidersHorizontal,
   Sprout,
   UserRoundCog,
+  UsersRound,
   WalletCards
 } from 'lucide-react';
 
@@ -1698,6 +1703,39 @@ function App() {
   const renderQuoteForm = () => {
     const updateQuote = (field, value) => setQuoteData((prev) => ({ ...prev, [field]: value }));
     const clampAge = (value) => Math.max(18, Math.min(99, Number(value) || 30));
+    const lifeStageCards = [
+      {
+        id: '20s-30s',
+        title: 'Building Foundations',
+        subLabel: '20s to 30s',
+        accentClass: 'text-emerald-500',
+        titleClass: 'text-emerald-700',
+        iconWrapClass: 'bg-emerald-50 ring-1 ring-emerald-100',
+        animationClass: 'age-stage-float',
+        Icon: KeyRound
+      },
+      {
+        id: '30s-40s',
+        title: 'Growth & Family',
+        subLabel: '30s to 40s',
+        accentClass: 'text-indigo-500',
+        titleClass: 'text-indigo-700',
+        iconWrapClass: 'bg-indigo-50 ring-1 ring-indigo-100',
+        animationClass: 'age-stage-pulse',
+        Icon: Home,
+        SupportIcon: UsersRound
+      },
+      {
+        id: '50s-above',
+        title: 'Stability & Legacy',
+        subLabel: '50s +',
+        accentClass: 'text-rose-500',
+        titleClass: 'text-rose-700',
+        iconWrapClass: 'bg-rose-50 ring-1 ring-rose-100',
+        animationClass: 'age-stage-tilt',
+        Icon: Shield
+      }
+    ];
     const adjustAge = (delta) =>
       setQuoteData((prev) => ({
         ...prev,
@@ -1828,56 +1866,99 @@ function App() {
         <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 hide-scrollbar">
           {quoteStep === 1 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-6">Add your age range</h2>
-              <div className="bg-slate-100/80 p-3 rounded-xl mb-8 flex gap-3 items-start border border-slate-200/60">
-                <svg className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  Age helps us personalize your score and prepare a more realistic beginner-friendly roadmap. This is kept strictly private.
-                </p>
-              </div>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-3 text-center">Age</label>
-                  <div className="flex items-center justify-center gap-4 rounded-[1.5rem] border-2 border-slate-100 bg-white p-4 shadow-sm">
-                    <button
-                      type="button"
-                      aria-label="Decrease age"
-                      onPointerDown={() => startAgeHold('decrement')}
-                      onPointerUp={stopAgeHold}
-                      onPointerLeave={stopAgeHold}
-                      onPointerCancel={stopAgeHold}
-                      className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl font-black text-slate-700 transition hover:bg-slate-200 active:scale-95"
-                    >
-                      −
-                    </button>
-                    <div className="min-w-[7rem] text-center">
-                      <div className="text-5xl font-black tracking-tight text-slate-900">{quoteData.age}</div>
-                      <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">years old</div>
-                    </div>
-                    <button
-                      type="button"
-                      aria-label="Increase age"
-                      onPointerDown={() => startAgeHold('increment')}
-                      onPointerUp={stopAgeHold}
-                      onPointerLeave={stopAgeHold}
-                      onPointerCancel={stopAgeHold}
-                      className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800 text-3xl font-black text-white shadow-md transition hover:bg-slate-900 active:scale-95"
-                    >
-                      +
-                    </button>
+              <style>
+                {`
+                  @keyframes age-stage-float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-7px); }
+                  }
+
+                  @keyframes age-stage-pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                  }
+
+                  @keyframes age-stage-tilt {
+                    0%, 100% { transform: perspective(420px) rotateY(-12deg); }
+                    50% { transform: perspective(420px) rotateY(12deg); }
+                  }
+
+                  .age-stage-float {
+                    animation: age-stage-float 3s ease-in-out infinite;
+                  }
+
+                  .age-stage-pulse {
+                    animation: age-stage-pulse 4s ease-in-out infinite;
+                  }
+
+                  .age-stage-tilt {
+                    animation: age-stage-tilt 4.5s ease-in-out infinite;
+                    transform-style: preserve-3d;
+                  }
+                `}
+              </style>
+              <h2 className="text-slate-900 font-extrabold text-2xl mb-2">What chapter of life are you in?</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                Protection plans look a lot different in your 20s versus your 40s. Knowing your age helps us pull together a roadmap that makes sense for where you are right now.
+              </p>
+              <div className="rounded-[1.75rem] border border-slate-100 bg-white p-4 shadow-sm">
+                <label className="mb-4 block text-center text-xs font-bold uppercase tracking-wider text-slate-400">Your Age</label>
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    type="button"
+                    aria-label="Decrease age"
+                    onPointerDown={() => startAgeHold('decrement')}
+                    onPointerUp={stopAgeHold}
+                    onPointerLeave={stopAgeHold}
+                    onPointerCancel={stopAgeHold}
+                    className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-3xl font-black text-slate-700 shadow-sm transition hover:bg-slate-100 active:scale-95 focus:outline-none"
+                  >
+                    -
+                  </button>
+                  <div className="min-w-[7rem] rounded-[1.25rem] bg-slate-50 px-5 py-3 text-center ring-1 ring-slate-100">
+                    <div className="text-5xl font-black tracking-tight text-slate-900">{quoteData.age}</div>
+                    <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">years old</div>
                   </div>
-                  <p className="mt-2 text-center text-[11px] font-medium text-slate-400">Hold a button to adjust faster.</p>
+                  <button
+                    type="button"
+                    aria-label="Increase age"
+                    onPointerDown={() => startAgeHold('increment')}
+                    onPointerUp={stopAgeHold}
+                    onPointerLeave={stopAgeHold}
+                    onPointerCancel={stopAgeHold}
+                    className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-3xl font-black text-white shadow-md shadow-slate-300/70 transition hover:bg-slate-800 active:scale-95 focus:outline-none"
+                  >
+                    +
+                  </button>
                 </div>
+              </div>
+              <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5 mt-3 mb-7">
+                <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                Kept safe and completely private.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {lifeStageCards.map(({ id, title, subLabel, accentClass, titleClass, iconWrapClass, animationClass, Icon, SupportIcon }) => (
+                  <div key={id} className="bg-white/90 border border-slate-100 rounded-xl p-5 flex flex-col items-center text-center shadow-sm opacity-95">
+                    <div className={`relative mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${iconWrapClass}`}>
+                      <Icon className={`h-8 w-8 ${accentClass} ${animationClass}`} aria-hidden="true" />
+                      {SupportIcon && (
+                        <span className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-indigo-50 shadow-sm">
+                          <SupportIcon className="h-4 w-4 text-indigo-400" aria-hidden="true" />
+                        </span>
+                      )}
+                    </div>
+                    <h3 className={`text-sm font-extrabold leading-tight ${titleClass}`}>{title}</h3>
+                    <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">{subLabel}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {quoteStep === 2 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Primary Focus</h2>
-              <p className="text-slate-500 text-sm mb-6 font-medium">What do you want this estimate to prioritize?</p>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">What matters most right now?</h2>
+              <p className="text-slate-500 text-sm mb-6 font-medium">You don't have to tackle everything at once. Focus on what feels most important to you.</p>
               <div className="space-y-3">
                 {[
                   { id: 'family', label: 'Family Protection', icon: '👨‍👩‍👧‍👦' },
@@ -1901,7 +1982,7 @@ function App() {
 
           {quoteStep === 3 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Pick Your Comfort Zone</h2>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">What feels doable right now?</h2>
               <p className="text-slate-500 text-sm mb-6 font-medium">
                 Pick a starting point that fits naturally into your routine. Nothing is set, and you can always adjust as you go.
               </p>
@@ -2071,7 +2152,7 @@ function App() {
         </div>
 
         <div className="absolute bottom-0 left-0 w-full p-5 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent z-20">
-          <Button disabled={!canProceed() || isSubmitting} onClick={nextStep}>
+          <Button disabled={!canProceed() || isSubmitting} onClick={nextStep} variant="emerald">
             {quoteStep < 4 ? 'Continue' : isSubmitting ? 'Revealing...' : 'Reveal My Score & Roadmap'}
           </Button>
         </div>
