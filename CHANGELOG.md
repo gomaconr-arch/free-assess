@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.5.13 - 2026-06-24
+
+Prompt context:
+- Polish the final lead capture and submission flow with transparent contact copy, a slide-to-submit interaction, and loading/layout refinements.
+
+Changes:
+- Added a premium slide-to-submit control that grants consent and submits once a valid email is entered.
+- Updated the final capture screen copy to explain why both email and mobile number are requested.
+- Reworked the privacy promise to cover all contact details with a prominent emerald shield treatment.
+- Improved the submit loading state with "Preparing your analysis..." copy and a spinner in the slider thumb.
+- Added a quick fade-out transition before the analyzing screen unmounts.
+- Expanded the airplane celebration animation container edge-to-edge on mobile.
+- Updated budget daily cost text into colored premium badges.
+- Bumped project version for the final capture and submission UX polish.
+
 ## 1.5.12 - 2026-06-24
 
 Prompt context:
