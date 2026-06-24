@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.5.13 - 2026-06-24
+
+Prompt context:
+- Polish the final lead capture and submission flow with transparent contact copy, a slide-to-submit interaction, and loading/layout refinements.
+
+Changes:
+- Added a premium slide-to-submit control that grants consent and submits once a valid email is entered.
+- Updated the final capture screen copy to explain why both email and mobile number are requested.
+- Reworked the privacy promise to cover all contact details with a prominent emerald shield treatment.
+- Improved the submit loading state with "Preparing your analysis..." copy and a spinner in the slider thumb.
+- Added a quick fade-out transition before the analyzing screen unmounts.
+- Expanded the airplane celebration animation container edge-to-edge on mobile.
+- Updated budget daily cost text into colored premium badges.
+- Bumped project version for the final capture and submission UX polish.
+
+## 1.5.12 - 2026-06-24
+
+Prompt context:
+- Refine the personalization age step so the life-stage cards behave as a passive infographic while the tap-and-hold age stepper remains the primary input.
+
+Changes:
+- Restored the age tap-and-hold stepper with clamped age handling and timer cleanup.
+- Reworked the life-stage cards into subtle white infographic cards with emerald, indigo, and rose icon accents.
+- Kept the life-stage icon animations while removing heavy dark gradients that made the cards read as primary actions.
+- Moved the age selector above the infographic cards to keep the primary input visually dominant.
+- Applied the emerald action button style to the personalization form CTA.
+- Bumped project version for the age-step visual hierarchy and CTA refinement.
+
 ## 1.5.11 - 2026-06-19
 
 Prompt context:

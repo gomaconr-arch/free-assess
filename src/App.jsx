@@ -7,11 +7,16 @@ import {
   ChevronRight,
   Compass,
   HeartPulse,
+  Home,
   Info,
+  KeyRound,
   Landmark,
+  Lock,
+  Shield,
   SlidersHorizontal,
   Sprout,
   UserRoundCog,
+  UsersRound,
   WalletCards
 } from 'lucide-react';
 
@@ -317,7 +322,109 @@ const CelebrationOverlay = ({ active, src, className = '' }) => {
 
   return (
     <div className={`pointer-events-none absolute inset-0 z-40 flex items-center justify-center ${className}`}>
-      <RemoteLottie src={src} loop={false} className="h-full w-full" />
+      <RemoteLottie src={src} loop={false} className="h-full w-full max-w-none" />
+    </div>
+  );
+};
+
+const SlideToSubmit = ({ disabled, isSubmitting, onSubmit }) => {
+  const trackRef = useRef(null);
+  const dragRef = useRef(0);
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const thumbSize = 56;
+
+  const getMaxDrag = () => {
+    const trackWidth = trackRef.current?.getBoundingClientRect().width || 0;
+    return Math.max(0, trackWidth - thumbSize - 8);
+  };
+
+  const updateDrag = (clientX) => {
+    if (!trackRef.current) return;
+
+    const rect = trackRef.current.getBoundingClientRect();
+    const nextX = Math.max(0, Math.min(getMaxDrag(), clientX - rect.left - thumbSize / 2));
+    dragRef.current = nextX;
+    setDragX(nextX);
+  };
+
+  const resetDrag = () => {
+    setIsDragging(false);
+    dragRef.current = 0;
+    setDragX(0);
+  };
+
+  const completeDrag = () => {
+    const maxDrag = getMaxDrag();
+    const didComplete = maxDrag > 0 && dragRef.current >= maxDrag * 0.86;
+
+    setIsDragging(false);
+
+    if (didComplete && !disabled && !isSubmitting) {
+      dragRef.current = maxDrag;
+      setDragX(maxDrag);
+      onSubmit();
+      return;
+    }
+
+    dragRef.current = 0;
+    setDragX(0);
+  };
+
+  useEffect(() => {
+    if (disabled || isSubmitting) {
+      dragRef.current = 0;
+      setDragX(0);
+      setIsDragging(false);
+    }
+  }, [disabled, isSubmitting]);
+
+  return (
+    <div
+      ref={trackRef}
+      className={`relative h-16 overflow-hidden rounded-full p-1 shadow-lg transition-all ${
+        disabled
+          ? 'bg-slate-200 text-slate-400 shadow-none'
+          : 'bg-slate-900 text-white shadow-emerald-500/20'
+      }`}
+      onPointerMove={(event) => {
+        if (isDragging && !disabled && !isSubmitting) {
+          updateDrag(event.clientX);
+        }
+      }}
+      onPointerUp={completeDrag}
+      onPointerCancel={resetDrag}
+      aria-disabled={disabled || isSubmitting}
+    >
+      <div
+        className="absolute inset-y-1 left-1 rounded-full bg-emerald-500 transition-[width] duration-100"
+        style={{ width: `${dragX + thumbSize}px`, opacity: disabled ? 0 : 1 }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 flex items-center justify-center px-16 text-sm font-extrabold">
+        {isSubmitting ? 'Preparing your analysis...' : disabled ? 'Enter a valid email' : 'Slide to Submit'}
+      </div>
+      <button
+        type="button"
+        disabled={disabled || isSubmitting}
+        aria-label="Slide to submit"
+        className="absolute left-1 top-1 flex h-14 w-14 touch-none items-center justify-center rounded-full bg-white text-slate-900 shadow-md transition-transform disabled:cursor-not-allowed disabled:text-slate-300"
+        style={{ transform: `translateX(${dragX}px)` }}
+        onPointerDown={(event) => {
+          if (disabled || isSubmitting) return;
+
+          event.currentTarget.setPointerCapture(event.pointerId);
+          setIsDragging(true);
+          updateDrag(event.clientX);
+        }}
+      >
+        {isSubmitting ? (
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-500" aria-hidden="true" />
+        ) : (
+          <ArrowRight className="h-5 w-5" strokeWidth={3} aria-hidden="true" />
+        )}
+      </button>
     </div>
   );
 };
@@ -656,21 +763,27 @@ const QuestionPulseIcon = () => (
 
 const AnalyzingScreen = ({ onComplete }) => {
   const [text, setText] = useState('Checking your cash flow layer...');
+  const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
     const t1 = setTimeout(() => setText('Reviewing your foundation...'), 1000);
     const t2 = setTimeout(() => setText('Matching goals with next steps...'), 2200);
-    const t3 = setTimeout(() => onComplete(), 3500);
+    const t3 = setTimeout(() => {
+      setText('Your profile is ready.');
+      setIsExiting(true);
+    }, 3500);
+    const t4 = setTimeout(() => onComplete(), 3800);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
+      clearTimeout(t4);
     };
   }, [onComplete]);
 
   return (
-    <div className="h-full min-h-[100dvh] md:min-h-full flex flex-col justify-center items-center p-8 bg-slate-800 text-white text-center animate-fade-in relative overflow-hidden">
+    <div className={`h-full min-h-[100dvh] md:min-h-full flex flex-col justify-center items-center p-8 bg-slate-800 text-white text-center animate-fade-in relative overflow-hidden transition-opacity duration-300 ease-out ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent"></div>
       <div className="relative z-10 mb-8">
         <div className="welcome-logo">
@@ -1452,7 +1565,7 @@ function App() {
 
     return (
       <div className="h-full flex flex-col bg-slate-50 relative overflow-hidden">
-        <CelebrationOverlay active={isFinalCelebrationActive} src={LOTTIE_URLS.roadmapCelebrate} className="bg-slate-950/35 backdrop-blur-md [&>div]:m-6 [&>div]:rounded-[2rem] [&>div]:bg-white/35 [&>div]:shadow-2xl [&>div]:ring-1 [&>div]:ring-white/60" />
+        <CelebrationOverlay active={isFinalCelebrationActive} src={LOTTIE_URLS.roadmapCelebrate} className="bg-slate-950/35 backdrop-blur-md [&>div]:w-screen md:[&>div]:w-full [&>div]:max-w-none [&>div]:bg-white/35 [&>div]:shadow-2xl [&>div]:ring-1 [&>div]:ring-white/60" />
         <div className="bg-white px-6 pt-10 pb-6 rounded-b-[2rem] shadow-sm relative z-10 border-b border-slate-100 animate-slide-up">
           <h2 className="text-xl font-extrabold text-slate-800 mb-5">Your Profile Journey</h2>
           <div className="mb-2 flex justify-between items-end">
@@ -1698,6 +1811,39 @@ function App() {
   const renderQuoteForm = () => {
     const updateQuote = (field, value) => setQuoteData((prev) => ({ ...prev, [field]: value }));
     const clampAge = (value) => Math.max(18, Math.min(99, Number(value) || 30));
+    const lifeStageCards = [
+      {
+        id: '20s-30s',
+        title: 'Building Foundations',
+        subLabel: '20s to 30s',
+        accentClass: 'text-emerald-500',
+        titleClass: 'text-emerald-700',
+        iconWrapClass: 'bg-emerald-50 ring-1 ring-emerald-100',
+        animationClass: 'age-stage-float',
+        Icon: KeyRound
+      },
+      {
+        id: '30s-40s',
+        title: 'Growth & Family',
+        subLabel: '30s to 40s',
+        accentClass: 'text-indigo-500',
+        titleClass: 'text-indigo-700',
+        iconWrapClass: 'bg-indigo-50 ring-1 ring-indigo-100',
+        animationClass: 'age-stage-pulse',
+        Icon: Home,
+        SupportIcon: UsersRound
+      },
+      {
+        id: '50s-above',
+        title: 'Stability & Legacy',
+        subLabel: '50s +',
+        accentClass: 'text-rose-500',
+        titleClass: 'text-rose-700',
+        iconWrapClass: 'bg-rose-50 ring-1 ring-rose-100',
+        animationClass: 'age-stage-tilt',
+        Icon: Shield
+      }
+    ];
     const adjustAge = (delta) =>
       setQuoteData((prev) => ({
         ...prev,
@@ -1717,8 +1863,9 @@ function App() {
       updateAge();
       ageHoldTimerRef.current = window.setInterval(updateAge, 120);
     };
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(quoteData.email.trim());
 
-    const submitLead = async () => {
+    const submitLead = async (consentGranted = quoteData.consent) => {
       if (isSubmitting) {
         return;
       }
@@ -1735,6 +1882,7 @@ function App() {
         answers,
         quoteData: {
           ...quoteData,
+          consent: consentGranted,
           age: normalizedAge,
           birthYear
         },
@@ -1802,10 +1950,18 @@ function App() {
       }
 
       if (quoteStep === 4) {
-        return quoteData.name && quoteData.phone && quoteData.email && quoteData.consent;
+        return isEmailValid;
       }
 
       return false;
+    };
+    const handleSlideSubmit = () => {
+      if (!isEmailValid || isSubmitting) {
+        return;
+      }
+
+      setQuoteData((prev) => ({ ...prev, consent: true }));
+      submitLead(true);
     };
 
     return (
@@ -1828,56 +1984,99 @@ function App() {
         <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 hide-scrollbar">
           {quoteStep === 1 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-6">Add your age range</h2>
-              <div className="bg-slate-100/80 p-3 rounded-xl mb-8 flex gap-3 items-start border border-slate-200/60">
-                <svg className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                  Age helps us personalize your score and prepare a more realistic beginner-friendly roadmap. This is kept strictly private.
-                </p>
-              </div>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-3 text-center">Age</label>
-                  <div className="flex items-center justify-center gap-4 rounded-[1.5rem] border-2 border-slate-100 bg-white p-4 shadow-sm">
-                    <button
-                      type="button"
-                      aria-label="Decrease age"
-                      onPointerDown={() => startAgeHold('decrement')}
-                      onPointerUp={stopAgeHold}
-                      onPointerLeave={stopAgeHold}
-                      onPointerCancel={stopAgeHold}
-                      className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-3xl font-black text-slate-700 transition hover:bg-slate-200 active:scale-95"
-                    >
-                      −
-                    </button>
-                    <div className="min-w-[7rem] text-center">
-                      <div className="text-5xl font-black tracking-tight text-slate-900">{quoteData.age}</div>
-                      <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">years old</div>
-                    </div>
-                    <button
-                      type="button"
-                      aria-label="Increase age"
-                      onPointerDown={() => startAgeHold('increment')}
-                      onPointerUp={stopAgeHold}
-                      onPointerLeave={stopAgeHold}
-                      onPointerCancel={stopAgeHold}
-                      className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-800 text-3xl font-black text-white shadow-md transition hover:bg-slate-900 active:scale-95"
-                    >
-                      +
-                    </button>
+              <style>
+                {`
+                  @keyframes age-stage-float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-7px); }
+                  }
+
+                  @keyframes age-stage-pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                  }
+
+                  @keyframes age-stage-tilt {
+                    0%, 100% { transform: perspective(420px) rotateY(-12deg); }
+                    50% { transform: perspective(420px) rotateY(12deg); }
+                  }
+
+                  .age-stage-float {
+                    animation: age-stage-float 3s ease-in-out infinite;
+                  }
+
+                  .age-stage-pulse {
+                    animation: age-stage-pulse 4s ease-in-out infinite;
+                  }
+
+                  .age-stage-tilt {
+                    animation: age-stage-tilt 4.5s ease-in-out infinite;
+                    transform-style: preserve-3d;
+                  }
+                `}
+              </style>
+              <h2 className="text-slate-900 font-extrabold text-2xl mb-2">What chapter of life are you in?</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                Protection plans look a lot different in your 20s versus your 40s. Knowing your age helps us pull together a roadmap that makes sense for where you are right now.
+              </p>
+              <div className="rounded-[1.75rem] border border-slate-100 bg-white p-4 shadow-sm">
+                <label className="mb-4 block text-center text-xs font-bold uppercase tracking-wider text-slate-400">Your Age</label>
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    type="button"
+                    aria-label="Decrease age"
+                    onPointerDown={() => startAgeHold('decrement')}
+                    onPointerUp={stopAgeHold}
+                    onPointerLeave={stopAgeHold}
+                    onPointerCancel={stopAgeHold}
+                    className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-3xl font-black text-slate-700 shadow-sm transition hover:bg-slate-100 active:scale-95 focus:outline-none"
+                  >
+                    -
+                  </button>
+                  <div className="min-w-[7rem] rounded-[1.25rem] bg-slate-50 px-5 py-3 text-center ring-1 ring-slate-100">
+                    <div className="text-5xl font-black tracking-tight text-slate-900">{quoteData.age}</div>
+                    <div className="mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">years old</div>
                   </div>
-                  <p className="mt-2 text-center text-[11px] font-medium text-slate-400">Hold a button to adjust faster.</p>
+                  <button
+                    type="button"
+                    aria-label="Increase age"
+                    onPointerDown={() => startAgeHold('increment')}
+                    onPointerUp={stopAgeHold}
+                    onPointerLeave={stopAgeHold}
+                    onPointerCancel={stopAgeHold}
+                    className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-900 text-3xl font-black text-white shadow-md shadow-slate-300/70 transition hover:bg-slate-800 active:scale-95 focus:outline-none"
+                  >
+                    +
+                  </button>
                 </div>
+              </div>
+              <p className="text-xs text-slate-400 flex items-center justify-center gap-1.5 mt-3 mb-7">
+                <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                Kept safe and completely private.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {lifeStageCards.map(({ id, title, subLabel, accentClass, titleClass, iconWrapClass, animationClass, Icon, SupportIcon }) => (
+                  <div key={id} className="bg-white/90 border border-slate-100 rounded-xl p-5 flex flex-col items-center text-center shadow-sm opacity-95">
+                    <div className={`relative mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${iconWrapClass}`}>
+                      <Icon className={`h-8 w-8 ${accentClass} ${animationClass}`} aria-hidden="true" />
+                      {SupportIcon && (
+                        <span className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-indigo-50 shadow-sm">
+                          <SupportIcon className="h-4 w-4 text-indigo-400" aria-hidden="true" />
+                        </span>
+                      )}
+                    </div>
+                    <h3 className={`text-sm font-extrabold leading-tight ${titleClass}`}>{title}</h3>
+                    <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">{subLabel}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {quoteStep === 2 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Primary Focus</h2>
-              <p className="text-slate-500 text-sm mb-6 font-medium">What do you want this estimate to prioritize?</p>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">What matters most right now?</h2>
+              <p className="text-slate-500 text-sm mb-6 font-medium">You don't have to tackle everything at once. Focus on what feels most important to you.</p>
               <div className="space-y-3">
                 {[
                   { id: 'family', label: 'Family Protection', icon: '👨‍👩‍👧‍👦' },
@@ -1901,59 +2100,62 @@ function App() {
 
           {quoteStep === 3 && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Pick Your Comfort Zone</h2>
+              <h2 className="text-xl font-extrabold text-slate-800 mb-2">What feels doable right now?</h2>
               <p className="text-slate-500 text-sm mb-6 font-medium">
-                Pick a starting point that fits naturally into your routine. Nothing is set, and you can always adjust as you go.
+                If you decided to start setting aside some cash each month just for this, what amount wouldn't hurt your daily budget?
               </p>
               <div className="space-y-4">
                 {[
                   {
                     id: '<1500',
-                    title: 'Starter Foundation',
+                    title: 'Simple Start',
                     label: 'Below ₱1,500 / month',
                     daily: '~₱50/day',
-                    desc: 'For starting small and building consistency.',
-                    support: 'May help with basic protection or entry-level planning options.',
+                    dailyBadgeColor: 'bg-emerald-100 text-emerald-800',
+                    desc: 'Perfect if you want to start building a safety net without feeling it in your wallet.',
+                    support: 'Usually covers basic health emergencies or simple peace-of-mind protection.',
                     badge: null
                   },
                   {
                     id: '1500-3000',
-                    title: 'Balanced Protection',
+                    title: 'The Sweet Spot',
                     label: '₱1,500 – ₱3,000 / month',
                     daily: '~₱50-₱100/day',
-                    desc: 'For practical protection that fits monthly cash flow.',
-                    support: 'May support starter life coverage, health protection, or savings-focused options depending on your profile.',
+                    dailyBadgeColor: 'bg-indigo-100 text-indigo-800',
+                    desc: 'A comfortable middle ground. Solid coverage that still leaves room for daily life.',
+                    support: 'Great for a mix of health cover, family protection, and starting a little nest egg.',
                     badge: 'Most practical starting point',
                     badgeColor: 'bg-indigo-100 text-indigo-700'
                   },
                   {
                     id: '3000-5000',
-                    title: 'Stronger Safety Net',
+                    title: 'Stronger Shield',
                     label: '₱3,000 – ₱5,000 / month',
                     daily: '~₱100-₱160/day',
-                    desc: 'For more flexibility, wider benefits, or stronger family protection.',
-                    support: 'May allow stronger coverage, added benefits, or more customized planning.',
+                    dailyBadgeColor: 'bg-emerald-100 text-emerald-800',
+                    desc: 'For when you have more people relying on you and want fewer things to worry about.',
+                    support: 'Unlocks better health benefits, stronger family protection, and faster savings growth.',
                     badge: 'More flexibility',
                     badgeColor: 'bg-emerald-100 text-emerald-700'
                   },
                   {
                     id: '5000+',
-                    title: 'Growth Builder',
+                    title: 'Wealth Builder',
                     label: '₱5,000+ / month',
                     daily: '₱160+/day',
-                    desc: 'For stronger long-term planning, savings, and protection potential.',
-                    support:
-                      'May support higher protection, investment-linked options, education funding, or retirement planning depending on suitability.',
+                    dailyBadgeColor: 'bg-amber-100 text-amber-800',
+                    desc: 'For serious long-term goals. Protects you now while actively growing your money for later.',
+                    support: "Ideal for things like your kids’ college fund, retirement, or major life upgrades.",
                     badge: 'Long-term focused',
                     badgeColor: 'bg-amber-100 text-amber-700'
                   },
                   {
                     id: 'unsure',
-                    title: 'Help Me Decide',
-                    label: 'Not sure yet',
+                    title: "I’m Not Sure Yet",
+                    label: 'Help me decide',
                     daily: null,
-                    desc: 'Let an advisor suggest a realistic range based on your profile.',
-                    support: 'Get personalized guidance without pressure.',
+                    desc: "No worries. Let’s look at your answers and suggest a number that won’t stress you out.",
+                    support: "We’ll do the math together. Zero pressure.",
                     badge: null
                   }
                 ].map((opt) => {
@@ -1978,7 +2180,7 @@ function App() {
                       </div>
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-bold text-slate-600 text-sm">{opt.label}</span>
-                        {opt.daily && <span className="text-[11px] font-medium text-slate-400 bg-white border border-slate-200 px-2 py-0.5 rounded-md">{opt.daily}</span>}
+                        {opt.daily && <span className={`px-2.5 py-1 rounded-md text-xs font-bold ${opt.dailyBadgeColor}`}>{opt.daily}</span>}
                       </div>
                       <p className="text-xs text-slate-500 font-medium leading-relaxed">{opt.desc}</p>
 
@@ -2004,7 +2206,7 @@ function App() {
           {quoteStep === 4 && (
             <div className="animate-fade-in">
               <div className="mb-5 flex justify-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-100 bg-indigo-50 text-indigo-600 shadow-sm animate-pulse">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50 text-indigo-500 shadow-sm">
                   <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M3.75 6.75h16.5v10.5H3.75z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="m4.5 7.5 7.5 5.25 7.5-5.25" />
@@ -2012,9 +2214,9 @@ function App() {
                   </svg>
                 </div>
               </div>
-              <h2 className="text-xl font-extrabold text-slate-800 mb-2">Where should we send your results?</h2>
-              <p className="text-slate-500 text-sm mb-6 font-medium">
-                Your analysis is complete. Let us know where to deliver your exact score and personalized roadmap.
+              <h2 className="text-slate-900 font-extrabold text-2xl mb-2">Where to send your results?</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-8">
+                We ask for the number to send SMS confirming it arrived.
               </p>
               <div className="space-y-5">
                 <div>
@@ -2046,35 +2248,30 @@ function App() {
                     onChange={(e) => updateQuote('email', e.target.value)}
                     className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl focus:border-slate-800 focus:outline-none font-medium text-slate-700 shadow-sm"
                   />
-                  <p className="mt-2 text-[11px] text-slate-400 font-medium leading-relaxed">
-                    We&apos;ll use this email to send your detailed profile assessment and helpful follow-up guidance related to your results.
+                  <p className="mt-3 flex items-center gap-2 text-sm text-slate-700 font-medium leading-relaxed">
+                    <Shield className="h-4 w-4 fill-emerald-100 text-emerald-500" aria-hidden="true" />
+                    Your details are kept strictly private and secure.
                   </p>
                 </div>
-                <div className="pt-2 flex items-start gap-3 bg-slate-100/50 p-4 rounded-2xl border border-slate-100">
-                  <div
-                    className={`mt-0.5 w-5 h-5 flex-shrink-0 border-2 rounded flex items-center justify-center cursor-pointer transition-colors ${quoteData.consent ? 'border-slate-800 bg-slate-800' : 'border-slate-300 bg-white'}`}
-                    onClick={() => updateQuote('consent', !quoteData.consent)}
-                  >
-                    {quoteData.consent && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed cursor-pointer" onClick={() => updateQuote('consent', !quoteData.consent)}>
-                    I agree to receive my detailed profile assessment by email and to be contacted with relevant follow-up guidance. No payment or application is required.
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 mt-6">Transparency First</h3>
+                  <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                    By sliding to unlock, you grant us permission to send a detailed, customized assessment based directly on your inputs.
                   </p>
                 </div>
+                <SlideToSubmit disabled={!isEmailValid} isSubmitting={isSubmitting} onSubmit={handleSlideSubmit} />
               </div>
             </div>
           )}
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full p-5 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent z-20">
-          <Button disabled={!canProceed() || isSubmitting} onClick={nextStep}>
-            {quoteStep < 4 ? 'Continue' : isSubmitting ? 'Revealing...' : 'Reveal My Score & Roadmap'}
-          </Button>
-        </div>
+        {quoteStep < 4 && (
+          <div className="absolute bottom-0 left-0 w-full p-5 bg-gradient-to-t from-slate-50 via-slate-50 to-transparent z-20">
+            <Button disabled={!canProceed() || isSubmitting} onClick={nextStep} variant="emerald">
+              Continue
+            </Button>
+          </div>
+        )}
       </div>
     );
   };
