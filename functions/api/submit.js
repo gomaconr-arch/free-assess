@@ -350,21 +350,10 @@ const forwardAssessmentPayload = async ({ env, agent, payload }) => {
     headers['X-Assessment-Secret'] = env.EXTERNAL_SYSTEM_SHARED_SECRET;
   }
 
-  const forwardPayload = {
-    ...payload,
-    agent: agent
-      ? {
-          slug: agent.slug,
-          agentName: agent.agentName,
-          toolName: agent.toolName
-        }
-      : null
-  };
-
   const response = await fetch(endpoint, {
     method: 'POST',
     headers,
-    body: JSON.stringify(forwardPayload)
+    body: JSON.stringify(payload)
   });
 
   let result = null;
@@ -378,6 +367,15 @@ const forwardAssessmentPayload = async ({ env, agent, payload }) => {
   if (!response.ok) {
     throw new Error(result?.error || result?.message || `External forwarding failed with status ${response.status}.`);
   }
+
+  console.log(
+    'External assessment forwarding response:',
+    JSON.stringify({
+      ok: result?.ok,
+      leadId: result?.leadId,
+      recommendationId: result?.recommendationId
+    })
+  );
 
   return { attempted: true, sent: true, status: response.status, result };
 };
@@ -465,7 +463,7 @@ export async function onRequestPost({ request, env }) {
     let forwarding = { attempted: false, sent: false };
 
     try {
-      forwarding = await forwardAssessmentPayload({ env, agent, payload: { ...payload, agentSlug: agent?.slug || agentSlug || null } });
+      forwarding = await forwardAssessmentPayload({ env, agent, payload });
     } catch (error) {
       console.error('External assessment forwarding failed:', error.message);
 
