@@ -460,7 +460,52 @@ CTA text and focus change based on user profile combinations, including:
 
 ---
 
-# 10. Source References
+# 10. Manual Agent Configuration
+
+## Scope
+The multi-agent assessment app should remain stateless. Its responsibility is to load the agent configuration, accept the form submission, email the configured agent, and forward the same payload to the external system. Lead storage, recommendation processing, pipeline status, and history belong to the external system.
+
+## URL pattern
+- /richard
+- /maria
+- /agent_name
+
+The first path segment is the agent slug. Unknown or inactive slugs should show an unavailable page instead of accepting submissions.
+
+## Required agent fields
+```json
+{
+  "slug": "richard",
+  "agentName": "Richard Badlisan",
+  "agentEmail": "richard@example.com",
+  "toolName": "Financial Foundation Check",
+  "headline": "Check your financial foundation in minutes",
+  "subheadline": "Answer a few questions and get a personalized readiness snapshot.",
+  "status": "active",
+  "externalSystemEndpoint": "https://external-system.example.com/api/assessment-intake"
+}
+```
+
+## Manual setup checklist
+1. Add the agent configuration record in the configured agent source.
+2. Keep the slug lowercase, unique, URL-safe, and clear of reserved paths such as api or asset routes.
+3. Set agentEmail to the advisor inbox that should receive the complete assessment submission.
+4. Confirm EMAIL_FROM is a shared verified sender on the Cloudflare domain.
+5. Keep external API secrets server-side only.
+6. Open /{slug} and confirm the agent-specific tool name and copy render correctly.
+7. Submit a test assessment and verify the email, Reply-To, and external payload forwarding.
+
+## Recommended email headers
+```txt
+From: Financial Foundation Check <leads@domain.com>
+To: Agent Name <agent@email.com>
+Reply-To: Lead Name <lead@email.com>
+Subject: New Financial Foundation Lead: Lead Name
+```
+
+---
+
+# 11. Source References
 
 - App flow and business logic: [src/App.jsx](src/App.jsx)
 - Entry point and mount: [src/main.jsx](src/main.jsx)

@@ -1,3 +1,5 @@
+import { findAgentBySlug, normalizeAgentSlug } from '../lib/agents.js';
+
 const jsonResponse = (body, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -30,6 +32,8 @@ const escapeHtml = (value) =>
 const normalizeEmailAddress = (value) => String(value ?? '').replace(/[\r\n<>,]+/g, '').trim();
 
 const isEmailAddress = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmailAddress(value));
+
+const shouldRequireExternalForward = (env) => String(env.REQUIRE_EXTERNAL_FORWARD || '').toLowerCase() === 'true';
 
 const OPTION_LABELS = {
   stage: {
@@ -102,14 +106,14 @@ const labelValue = (field, value) => {
   return OPTION_LABELS[field]?.[value] || valueOrDash(value);
 };
 
-const buildReportSections = (payload) => {
+const buildReportSections = (payload, agent = null) => {
   const quoteData = payload.quoteData || {};
   const answers = payload.answers || {};
   const scoreData = payload.scoreData || {};
   const age = normalizeAge(quoteData.age);
   const birthYear = quoteData.birthYear || (age ? new Date().getFullYear() - age : null);
 
-  return [
+  const sections = [
     {
       title: 'Lead Contact',
       rows: [
@@ -170,12 +174,25 @@ const buildReportSections = (payload) => {
       ]
     }
   ];
+
+  if (agent) {
+    sections.unshift({
+      title: 'Agent Routing',
+      rows: [
+        ['Agent', agent.agentName],
+        ['Agent Slug', agent.slug],
+        ['Tool Name', agent.toolName]
+      ]
+    });
+  }
+
+  return sections;
 };
 
-const formatLeadText = (payload) => {
-  const lines = ['New Financial Foundation Lead', ''];
+const formatLeadText = (payload, agent = null) => {
+  const lines = [agent?.toolName ? `New ${agent.toolName} Lead` : 'New Financial Foundation Lead', ''];
 
-  buildReportSections(payload).forEach((section) => {
+  buildReportSections(payload, agent).forEach((section) => {
     lines.push(section.title);
     section.rows.forEach(([label, value]) => {
       lines.push(`${label}: ${valueOrDash(value)}`);
@@ -188,8 +205,8 @@ const formatLeadText = (payload) => {
   return lines.join('\n');
 };
 
-const formatLeadHtml = (payload) => {
-  const sections = buildReportSections(payload)
+const formatLeadHtml = (payload, agent = null) => {
+  const sections = buildReportSections(payload, agent)
     .map((section) => {
       const tableRows = section.rows
         .map(
@@ -211,7 +228,7 @@ const formatLeadHtml = (payload) => {
 
   return `
     <div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5;">
-      <h1 style="font-size:20px;margin:0 0 16px;">New Financial Foundation Lead</h1>
+      <h1 style="font-size:20px;margin:0 0 16px;">${escapeHtml(agent?.toolName ? `New ${agent.toolName} Lead` : 'New Financial Foundation Lead')}</h1>
       ${sections}
       <h2 style="font-size:16px;margin:24px 0 8px;">Full JSON Payload</h2>
       <pre style="white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:12px;">${escapeHtml(
@@ -269,24 +286,100 @@ const formatContactCopyHtml = (payload) => {
   `;
 };
 
-const sendCloudflareEmail = async ({ env, to, from, subject, text, html }) => {
+const postCloudflareEmail = async ({ env, body }) => {
   const emailResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/email/sending/send`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${env.CLOUDFLARE_EMAIL_API_TOKEN}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      to,
-      from,
-      subject,
-      text,
-      html
-    })
+    body: JSON.stringify(body)
   });
 
   const result = await emailResponse.json();
   return { emailResponse, result };
+};
+
+const sendCloudflareEmail = async ({ env, to, from, replyTo, subject, text, html }) => {
+  const body = {
+    to,
+    from,
+    subject,
+    text,
+    html
+  };
+
+  if (!replyTo) {
+    return postCloudflareEmail({ env, body });
+  }
+
+  const responseWithReplyTo = await postCloudflareEmail({
+    env,
+    body: {
+      ...body,
+      reply_to: replyTo
+    }
+  });
+
+  const errorText = JSON.stringify(responseWithReplyTo.result?.errors || responseWithReplyTo.result || '');
+
+  if (responseWithReplyTo.emailResponse.ok || !/reply|unknown|field|schema|invalid/i.test(errorText)) {
+    return responseWithReplyTo;
+  }
+
+  console.error('Cloudflare Email REST API rejected reply_to; retrying without Reply-To header.');
+  return postCloudflareEmail({ env, body });
+};
+
+const forwardAssessmentPayload = async ({ env, agent, payload }) => {
+  const endpoint = agent?.externalSystemEndpoint || env.EXTERNAL_SYSTEM_ENDPOINT;
+
+  if (!endpoint) {
+    return { attempted: false, sent: false, skipped: true };
+  }
+
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+
+  if (env.EXTERNAL_SYSTEM_API_TOKEN) {
+    headers.Authorization = `Bearer ${env.EXTERNAL_SYSTEM_API_TOKEN}`;
+  }
+
+  if (env.EXTERNAL_SYSTEM_SHARED_SECRET) {
+    headers['X-Assessment-Secret'] = env.EXTERNAL_SYSTEM_SHARED_SECRET;
+  }
+
+  const forwardPayload = {
+    ...payload,
+    agent: agent
+      ? {
+          slug: agent.slug,
+          agentName: agent.agentName,
+          toolName: agent.toolName
+        }
+      : null
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(forwardPayload)
+  });
+
+  let result = null;
+
+  try {
+    result = await response.json();
+  } catch {
+    result = { statusText: response.statusText };
+  }
+
+  if (!response.ok) {
+    throw new Error(result?.error || result?.message || `External forwarding failed with status ${response.status}.`);
+  }
+
+  return { attempted: true, sent: true, status: response.status, result };
 };
 
 export async function onRequestPost({ request, env }) {
@@ -295,23 +388,37 @@ export async function onRequestPost({ request, env }) {
       return jsonResponse({ error: 'Missing Cloudflare Email REST API configuration.' }, 500);
     }
 
-    if (!env.EMAIL_TO || !env.EMAIL_FROM) {
-      return jsonResponse({ error: 'Missing EMAIL_TO or EMAIL_FROM environment variable.' }, 500);
+    if (!env.EMAIL_FROM) {
+      return jsonResponse({ error: 'Missing EMAIL_FROM environment variable.' }, 500);
     }
 
     const payload = await request.json();
     const quoteData = payload.quoteData || {};
+    const agentSlug = normalizeAgentSlug(payload.agentSlug || payload.agent?.slug);
+    const agent = agentSlug ? findAgentBySlug(env, agentSlug) : null;
+
+    if (agentSlug && (!agent || agent.status !== 'active')) {
+      return jsonResponse({ error: 'This agent link is unavailable.' }, 404);
+    }
+
+    if (!agent && !env.EMAIL_TO) {
+      return jsonResponse({ error: 'Missing agent routing or EMAIL_TO fallback.' }, 500);
+    }
 
     if (!quoteData.name || !quoteData.phone || !quoteData.email || !quoteData.consent) {
       return jsonResponse({ error: 'Missing required lead fields.' }, 400);
     }
 
     const from = normalizeEmailAddress(env.EMAIL_FROM);
-    const to = normalizeEmailAddress(env.EMAIL_TO);
+    const to = normalizeEmailAddress(agent?.agentEmail || env.EMAIL_TO);
     const contactEmail = normalizeEmailAddress(quoteData.email);
 
     if (!isEmailAddress(contactEmail)) {
       return jsonResponse({ error: 'Please enter a valid email address.' }, 400);
+    }
+
+    if (!isEmailAddress(to)) {
+      return jsonResponse({ error: 'Agent email routing is not valid.' }, 500);
     }
 
     const subject = `New Financial Foundation Lead: ${quoteData.name}`;
@@ -319,9 +426,10 @@ export async function onRequestPost({ request, env }) {
       env,
       to,
       from,
+      replyTo: contactEmail,
       subject,
-      text: formatLeadText(payload),
-      html: formatLeadHtml(payload)
+      text: formatLeadText(payload, agent),
+      html: formatLeadHtml(payload, agent)
     });
 
     if (!emailResponse.ok || !result.success) {
@@ -354,7 +462,25 @@ export async function onRequestPost({ request, env }) {
       }
     }
 
-    return jsonResponse({ ok: true, result: result.result, contactCopy });
+    let forwarding = { attempted: false, sent: false };
+
+    try {
+      forwarding = await forwardAssessmentPayload({ env, agent, payload: { ...payload, agentSlug: agent?.slug || agentSlug || null } });
+    } catch (error) {
+      console.error('External assessment forwarding failed:', error.message);
+
+      forwarding = {
+        attempted: true,
+        sent: false,
+        error: error.message
+      };
+
+      if (shouldRequireExternalForward(env)) {
+        return jsonResponse({ error: error.message, emailSent: true, contactCopy, forwarding }, 502);
+      }
+    }
+
+    return jsonResponse({ ok: true, result: result.result, contactCopy, forwarding });
   } catch (error) {
     console.error('Email sending failed:', error.message);
     return jsonResponse({ error: 'Submission failed.' }, 500);
