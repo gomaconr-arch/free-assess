@@ -466,9 +466,9 @@ CTA text and focus change based on user profile combinations, including:
 The multi-agent assessment app should remain stateless. Its responsibility is to load the agent configuration, accept the form submission, email the configured agent, and forward the same payload to the external system. Lead storage, recommendation processing, pipeline status, and history belong to the external system.
 
 ## URL pattern
-- /richard
-- /maria
-- /agent_name
+- https://assess.lablibre.com/richard
+- https://assess.lablibre.com/maria
+- https://assess.lablibre.com/agent_name
 
 The first path segment is the agent slug. Unknown or inactive slugs should show an unavailable page instead of accepting submissions.
 

@@ -123,9 +123,9 @@ For the multi-agent version, this assessment app should stay stateless. It only 
 Agent links should use the first path segment as the agent slug:
 
 ```txt
-https://domain.com/richard
-https://domain.com/maria
-https://domain.com/agent_name
+https://assess.lablibre.com/richard
+https://assess.lablibre.com/maria
+https://assess.lablibre.com/agent_name
 ```
 
 Each manually configured agent should have:

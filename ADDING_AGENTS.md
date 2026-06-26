@@ -5,13 +5,13 @@ This guide is for adding a new agent or advisor to the assessment tool without c
 Each agent gets their own link:
 
 ```txt
-https://yourdomain.com/agent_name
+https://assess.lablibre.com/agent_name
 ```
 
 Example:
 
 ```txt
-https://yourdomain.com/richard
+https://assess.lablibre.com/richard
 ```
 
 When someone submits the form from that link, the assessment email goes to that agent's email address. The same form data is also sent to the connected external system.
@@ -52,7 +52,7 @@ Each agent is written as one JSON object:
 This is the public link name. If the slug is `richard`, the public link is:
 
 ```txt
-https://yourdomain.com/richard
+https://assess.lablibre.com/richard
 ```
 
 Use lowercase letters, numbers, hyphens, or underscores only. Avoid spaces.
@@ -117,7 +117,7 @@ Then redeploy the Cloudflare Pages project.
 The agent link will be:
 
 ```txt
-https://yourdomain.com/richard
+https://assess.lablibre.com/richard
 ```
 
 ## Add More Than One Agent
@@ -133,8 +133,8 @@ Example:
 This creates:
 
 ```txt
-https://yourdomain.com/richard
-https://yourdomain.com/maria
+https://assess.lablibre.com/richard
+https://assess.lablibre.com/maria
 ```
 
 ## How To Update `AGENTS_JSON` In Cloudflare
