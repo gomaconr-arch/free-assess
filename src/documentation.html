@@ -466,18 +466,19 @@ CTA text and focus change based on user profile combinations, including:
 The multi-agent assessment app should remain stateless. Its responsibility is to load the agent configuration, accept the form submission, email the configured agent, and forward the same payload to the external system. Lead storage, recommendation processing, pipeline status, and history belong to the external system.
 
 ## URL pattern
-- https://assess.lablibre.com/richard
-- https://assess.lablibre.com/maria
+- https://assess.lablibre.com
+- https://assess.lablibre.com/advisor
+- https://assess.lablibre.com/team-member
 - https://assess.lablibre.com/agent_name
 
-The first path segment is the agent slug. Unknown or inactive slugs should show an unavailable page instead of accepting submissions.
+The first path segment is the agent slug. Unknown or inactive slugs should show an unavailable page instead of accepting submissions. The root URL can resolve to an active configured agent when DEFAULT_AGENT_SLUG is set to that agent's slug.
 
 ## Required agent fields
 ```json
 {
-  "slug": "richard",
-  "agentName": "Richard Badlisan",
-  "agentEmail": "richard@example.com",
+  "slug": "advisor",
+  "agentName": "Advisor Name",
+  "agentEmail": "advisor@example.com",
   "toolName": "Financial Foundation Check",
   "headline": "Check your financial foundation in minutes",
   "subheadline": "Answer a few questions and get a personalized readiness snapshot.",
@@ -491,9 +492,10 @@ The first path segment is the agent slug. Unknown or inactive slugs should show 
 2. Keep the slug lowercase, unique, URL-safe, and clear of reserved paths such as api or asset routes.
 3. Set agentEmail to the advisor inbox that should receive the complete assessment submission.
 4. Confirm EMAIL_FROM is a shared verified sender on the Cloudflare domain.
-5. Keep external API secrets server-side only.
-6. Open /{slug} and confirm the agent-specific tool name and copy render correctly.
-7. Submit a test assessment and verify the email, Reply-To, and external payload forwarding.
+5. If the root URL should use one advisor profile, set DEFAULT_AGENT_SLUG to that active slug.
+6. Keep external API secrets server-side only.
+7. Open /{slug} and confirm the agent-specific tool name and copy render correctly.
+8. Submit a test assessment and verify the email, Reply-To, and external payload forwarding.
 
 ## Recommended email headers
 ```txt

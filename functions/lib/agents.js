@@ -62,6 +62,18 @@ export const findAgentBySlug = (env, slug) => {
   return parseAgents(env).find((agent) => agent.slug === normalizedSlug) || null;
 };
 
+export const getDefaultAgentSlug = (env = {}) => normalizeAgentSlug(env.DEFAULT_AGENT_SLUG);
+
+export const findDefaultAgent = (env = {}) => {
+  const defaultSlug = getDefaultAgentSlug(env);
+
+  if (!defaultSlug) {
+    return null;
+  }
+
+  return findAgentBySlug(env, defaultSlug);
+};
+
 export const toPublicAgent = (agent) => ({
   slug: agent.slug,
   agentName: agent.agentName,

@@ -6,7 +6,7 @@ Prompt context:
 - Add stateless multi-agent submission routing, document non-technical agent setup, and verify the Cloudflare staging deployment path.
 
 Changes:
-- Added first-path-segment agent slug detection so links like `/richard` can load advisor-specific assessment copy.
+- Added first-path-segment agent slug detection so links like `/advisor` can load advisor-specific assessment copy.
 - Added `/api/agents/[slug]` for public agent configuration lookup from `AGENTS_JSON`.
 - Added stateless submission routing that sends lead notification emails to the configured `agentEmail`.
 - Added agent metadata to owner notification emails so routed submissions show the agent, slug, and tool name.

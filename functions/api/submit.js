@@ -1,4 +1,4 @@
-import { findAgentBySlug, normalizeAgentSlug } from '../lib/agents.js';
+import { findAgentBySlug, getDefaultAgentSlug, normalizeAgentSlug } from '../lib/agents.js';
 
 const jsonResponse = (body, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -392,11 +392,17 @@ export async function onRequestPost({ request, env }) {
 
     const payload = await request.json();
     const quoteData = payload.quoteData || {};
-    const agentSlug = normalizeAgentSlug(payload.agentSlug || payload.agent?.slug);
+    const submittedAgentSlug = normalizeAgentSlug(payload.agentSlug || payload.agent?.slug);
+    const defaultAgentSlug = getDefaultAgentSlug(env);
+    const agentSlug = submittedAgentSlug || defaultAgentSlug;
     const agent = agentSlug ? findAgentBySlug(env, agentSlug) : null;
 
-    if (agentSlug && (!agent || agent.status !== 'active')) {
+    if (submittedAgentSlug && (!agent || agent.status !== 'active')) {
       return jsonResponse({ error: 'This agent link is unavailable.' }, 404);
+    }
+
+    if (!submittedAgentSlug && defaultAgentSlug && (!agent || agent.status !== 'active')) {
+      return jsonResponse({ error: 'Default agent routing is unavailable.' }, 500);
     }
 
     if (!agent && !env.EMAIL_TO) {
