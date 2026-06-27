@@ -510,7 +510,16 @@ export async function onRequestPost({ request, env }) {
       };
 
       if (shouldRequireExternalForward(env)) {
-        return jsonResponse({ error: error.message, emailSent: true, contactCopy, forwarding }, 502);
+        return jsonResponse(
+          {
+            ok: false,
+            error: error.message,
+            emailSent: true,
+            contactCopy,
+            forwarding
+          },
+          424
+        );
       }
     }
 
