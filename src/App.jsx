@@ -36,6 +36,41 @@ const animationLoaders = {
   foundationReveal: () => import('./assets/lottie/foundationReveal.json')
 };
 
+const DEFAULT_AGENT_CONFIG = {
+  slug: '',
+  agentName: '',
+  toolName: 'Financial Foundation Check',
+  headline: 'Map My Future',
+  subheadline: "Let's look at where you stand today. Tap through a few quick steps to see how prepared you are for tomorrow.",
+  status: 'active'
+};
+
+const RESERVED_ROUTE_SEGMENTS = new Set([
+  'api',
+  'assets',
+  'documentation.html',
+  'financial_foundation_check.html',
+  'favicon.svg',
+  'thumbnail.jpg',
+  'social-preview.jpeg'
+]);
+
+const getInitialAgentSlug = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  const basePath = import.meta.env.BASE_URL || '/';
+  let path = window.location.pathname || '/';
+
+  if (basePath !== '/' && path.startsWith(basePath)) {
+    path = path.slice(basePath.length - 1) || '/';
+  }
+
+  const slug = path.split('/').filter(Boolean)[0] || '';
+  return RESERVED_ROUTE_SEGMENTS.has(slug) ? '' : slug;
+};
+
 const RemoteLottie = ({ src, loop = true, autoplay = true, className = '', style, onComplete }) => {
   const [animationData, setAnimationData] = useState(null);
 
@@ -1141,6 +1176,10 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubm
 };
 
 function App() {
+  const [agentSlug] = useState(getInitialAgentSlug);
+  const [agentConfig, setAgentConfig] = useState(DEFAULT_AGENT_CONFIG);
+  const [agentStatus, setAgentStatus] = useState(agentSlug ? 'loading' : 'ready');
+  const [agentError, setAgentError] = useState('');
   const [screen, setScreen] = useState('welcome');
   const [completedModules, setCompletedModules] = useState([]);
   const [activeModuleId, setActiveModuleId] = useState(null);
@@ -1220,6 +1259,48 @@ function App() {
   };
 
   useEffect(() => () => clearTimers(), []);
+
+  useEffect(() => {
+    if (!agentSlug) {
+      setAgentConfig(DEFAULT_AGENT_CONFIG);
+      setAgentStatus('ready');
+      return;
+    }
+
+    let isMounted = true;
+
+    const loadAgentConfig = async () => {
+      try {
+        const response = await fetch(`/api/agents/${encodeURIComponent(agentSlug)}`);
+        const body = await response.json().catch(() => null);
+
+        if (!response.ok || !body?.agent) {
+          throw new Error(body?.error || 'This assessment link is unavailable.');
+        }
+
+        if (isMounted) {
+          setAgentConfig({ ...DEFAULT_AGENT_CONFIG, ...body.agent });
+          setAgentStatus('ready');
+          setAgentError('');
+        }
+      } catch (error) {
+        if (isMounted) {
+          setAgentStatus('unavailable');
+          setAgentError(error.message || 'This assessment link is unavailable.');
+        }
+      }
+    };
+
+    loadAgentConfig();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [agentSlug]);
+
+  useEffect(() => {
+    document.title = agentConfig.toolName || DEFAULT_AGENT_CONFIG.toolName;
+  }, [agentConfig.toolName]);
 
   useEffect(() => {
     if (screen === 'hub' && pendingHubScroll && nextModuleRef.current) {
@@ -1538,11 +1619,12 @@ function App() {
       <div className="welcome-logo mb-8">
         <Compass className="h-10 w-10 text-white" strokeWidth={2.2} />
       </div>
+      <p className="mb-3 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-600">{agentConfig.toolName}</p>
       <h1 className="text-3xl font-extrabold text-slate-800 mb-4 tracking-tight leading-tight">
-        Map My Future
+        {agentConfig.headline}
       </h1>
       <p className="text-slate-500 mb-10 leading-relaxed max-w-xs mx-auto font-medium">
-        Let&apos;s look at where you stand today. Tap through a few quick steps to see how prepared you are for tomorrow.
+        {agentConfig.subheadline}
       </p>
       <div className="w-full mt-auto mb-8 space-y-4">
         <Button onClick={() => setScreen('hub')}>Start My Journey</Button>
@@ -1874,6 +1956,7 @@ function App() {
       const birthYear = new Date().getFullYear() - normalizedAge;
 
       const payload = {
+        agentSlug: agentConfig.slug || agentSlug || null,
         submittedAt: new Date().toISOString(),
         currentScreen: screen,
         completedModules,
@@ -2420,6 +2503,38 @@ function App() {
       </div>
     );
   };
+
+  const renderAgentStatusScreen = ({ title, message }) => (
+    <div className="screen-mesh h-full flex flex-col justify-center items-center p-8 text-center animate-fade-in relative z-10 overflow-hidden">
+      <div className="welcome-logo mb-8">
+        <Lock className="h-10 w-10 text-white" strokeWidth={2.2} />
+      </div>
+      <h1 className="text-2xl font-extrabold text-slate-800 mb-4 tracking-tight leading-tight">{title}</h1>
+      <p className="text-slate-500 leading-relaxed max-w-xs mx-auto font-medium">{message}</p>
+    </div>
+  );
+
+  if (agentStatus === 'loading') {
+    return (
+      <div className="app-shell w-full md:max-w-md md:h-[850px] md:min-h-0 md:max-h-[95vh] relative md:rounded-[2.5rem] md:shadow-2xl overflow-hidden flex flex-col md:border-[8px] md:border-slate-800 bg-white">
+        {renderAgentStatusScreen({
+          title: 'Loading Assessment',
+          message: 'Preparing this advisor link now.'
+        })}
+      </div>
+    );
+  }
+
+  if (agentStatus === 'unavailable') {
+    return (
+      <div className="app-shell w-full md:max-w-md md:h-[850px] md:min-h-0 md:max-h-[95vh] relative md:rounded-[2.5rem] md:shadow-2xl overflow-hidden flex flex-col md:border-[8px] md:border-slate-800 bg-white">
+        {renderAgentStatusScreen({
+          title: 'Assessment Link Unavailable',
+          message: agentError || 'This advisor link is not active right now.'
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell w-full md:max-w-md md:h-[850px] md:min-h-0 md:max-h-[95vh] relative md:rounded-[2.5rem] md:shadow-2xl overflow-hidden flex flex-col md:border-[8px] md:border-slate-800 bg-white">

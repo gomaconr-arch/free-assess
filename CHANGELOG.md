@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.5.14 - 2026-06-26
+
+Prompt context:
+- Add stateless multi-agent submission routing, document non-technical agent setup, and verify the Cloudflare staging deployment path.
+
+Changes:
+- Added first-path-segment agent slug detection so links like `/richard` can load advisor-specific assessment copy.
+- Added `/api/agents/[slug]` for public agent configuration lookup from `AGENTS_JSON`.
+- Added stateless submission routing that sends lead notification emails to the configured `agentEmail`.
+- Added agent metadata to owner notification emails so routed submissions show the agent, slug, and tool name.
+- Added external assessment forwarding support with per-agent endpoint override and shared-secret header support.
+- Added `functions/lib/agents.js` to normalize, validate, and resolve configured agents while excluding reserved app routes.
+- Added `ADDING_AGENTS.md` as a non-technical guide for creating, updating, testing, and disabling agent links in Cloudflare.
+- Updated README and in-app documentation with manual agent configuration, required environment variables, production URLs, and testing steps.
+- Adjusted external forwarding to send the original assessment payload directly and log a compact forwarding response summary.
+- Bumped project version for the multi-agent routing, agent documentation, and forwarding payload update.
+
 ## 1.5.13 - 2026-06-24
 
 Prompt context:
