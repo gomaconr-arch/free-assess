@@ -1178,7 +1178,7 @@ const DashboardScreen = ({ data, onTransitionToQuote, onResetJourney, onViewSubm
 function App() {
   const [agentSlug] = useState(getInitialAgentSlug);
   const [agentConfig, setAgentConfig] = useState(DEFAULT_AGENT_CONFIG);
-  const [agentStatus, setAgentStatus] = useState(agentSlug ? 'loading' : 'ready');
+  const [agentStatus, setAgentStatus] = useState('loading');
   const [agentError, setAgentError] = useState('');
   const [screen, setScreen] = useState('welcome');
   const [completedModules, setCompletedModules] = useState([]);
@@ -1261,18 +1261,22 @@ function App() {
   useEffect(() => () => clearTimers(), []);
 
   useEffect(() => {
-    if (!agentSlug) {
-      setAgentConfig(DEFAULT_AGENT_CONFIG);
-      setAgentStatus('ready');
-      return;
-    }
-
     let isMounted = true;
 
     const loadAgentConfig = async () => {
       try {
-        const response = await fetch(`/api/agents/${encodeURIComponent(agentSlug)}`);
+        const endpoint = agentSlug ? `/api/agents/${encodeURIComponent(agentSlug)}` : '/api/default-agent';
+        const response = await fetch(endpoint);
         const body = await response.json().catch(() => null);
+
+        if (!agentSlug && response.status === 404 && body?.defaultConfigured === false) {
+          if (isMounted) {
+            setAgentConfig(DEFAULT_AGENT_CONFIG);
+            setAgentStatus('ready');
+            setAgentError('');
+          }
+          return;
+        }
 
         if (!response.ok || !body?.agent) {
           throw new Error(body?.error || 'This assessment link is unavailable.');

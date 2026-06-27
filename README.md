@@ -37,16 +37,16 @@ The quote form posts lead data to `functions/api/submit.js`, which sends email t
 1. In Cloudflare, open the zone for your domain.
 2. Go to Email > Email Routing.
 3. Click Get started or Enable Email Routing.
-4. Add and verify destination addresses. This project is configured around these verified inboxes:
-	- `info@lablibre.com`
-	- `richard.badlisan@gmail.com`
+4. Add and verify destination addresses. For examples in this documentation, use placeholder inboxes:
+	- `sender@example.com`
+	- `advisor@example.com`
 5. Open the verification email sent by Cloudflare and verify that destination address.
 6. Let Cloudflare add the required Email Routing DNS records, or add the shown MX and TXT records manually if prompted.
 7. Confirm Email Routing shows as enabled for the zone.
 
 #### 2. Configure a verified sender
 
-1. Choose a sender address on your Cloudflare zone. For this project, use `info@lablibre.com`.
+1. Choose a sender address on your Cloudflare zone, such as `sender@example.com`.
 2. Make sure the sender domain is onboarded for Cloudflare Email sending.
 3. Use only a sender address from that verified Cloudflare zone. Cloudflare will reject unverified senders.
 
@@ -56,7 +56,7 @@ The Pages dashboard may not show a Send Email binding. That is expected. Use Clo
 
 1. In Cloudflare, open My Profile > API Tokens.
 2. Create a custom token.
-3. Grant the token permission to send email for the account that owns `lablibre.com`.
+3. Grant the token permission to send email for the account that owns your verified domain.
 4. Copy the token once and keep it secret.
 5. Copy your Cloudflare Account ID from the Cloudflare dashboard.
 
@@ -66,8 +66,9 @@ In the same Pages project, go to Settings > Environment variables and add:
 
 - `CLOUDFLARE_ACCOUNT_ID`: your Cloudflare account ID
 - `CLOUDFLARE_EMAIL_API_TOKEN`: the API token with Email Sending permission
-- `EMAIL_FROM`: `info@lablibre.com`
+- `EMAIL_FROM`: verified sender address, such as `sender@example.com`
 - `AGENTS_JSON`: JSON array of manually configured agents for `/agent_name` links
+- `DEFAULT_AGENT_SLUG`: optional slug from `AGENTS_JSON` that should own root submissions from `https://assess.example.com`
 - `EMAIL_TO`: optional fallback recipient for root/non-agent submissions
 - `EXTERNAL_SYSTEM_ENDPOINT`: optional fallback endpoint for forwarding assessment payloads
 - `EXTERNAL_SYSTEM_API_TOKEN`: optional bearer token for the external system
@@ -75,7 +76,7 @@ In the same Pages project, go to Settings > Environment variables and add:
 - `REQUIRE_EXTERNAL_FORWARD`: optional, set to `true` to fail submission when forwarding fails
 - `SEND_CONTACT_COPY`: optional, set to `true` to email the submitted contact a copy of their score and roadmap summary
 
-For multi-agent links, the Function uses `agentEmail` from `AGENTS_JSON` instead of the fixed `EMAIL_TO` fallback. Keep `EMAIL_FROM=info@lablibre.com` because the sender should be on the verified Cloudflare zone.
+For multi-agent links, the Function uses `agentEmail` from `AGENTS_JSON` instead of the fixed `EMAIL_TO` fallback. When `DEFAULT_AGENT_SLUG` is set, the root URL uses that same agent profile and routing. Keep `EMAIL_FROM` on a verified Cloudflare zone.
 
 By default, the Function sends the complete lead report to the resolved agent email. When `SEND_CONTACT_COPY=true`, the Function also sends a customer-facing copy to the email address entered in the form. The contact-copy send is best effort: if the owner notification succeeds but Cloudflare rejects the contact copy, the form still completes and the failure is logged in the Pages Function logs.
 
@@ -107,9 +108,10 @@ The local `.dev.vars` file should not be committed.
 ```txt
 CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
 CLOUDFLARE_EMAIL_API_TOKEN=your_email_sending_api_token
-EMAIL_FROM=info@lablibre.com
-EMAIL_TO=info@lablibre.com
-AGENTS_JSON=[{"slug":"richard","agentName":"Richard Badlisan","agentEmail":"richard@example.com","toolName":"Financial Foundation Check","headline":"Check your financial foundation in minutes","subheadline":"Answer a few questions and get a personalized readiness snapshot.","status":"active","externalSystemEndpoint":"https://external-system.example.com/api/assessment-intake"}]
+EMAIL_FROM=sender@example.com
+EMAIL_TO=owner@example.com
+AGENTS_JSON=[{"slug":"advisor","agentName":"Advisor Name","agentEmail":"advisor@example.com","toolName":"Financial Foundation Check","headline":"Check your financial foundation in minutes","subheadline":"Answer a few questions and get a personalized readiness snapshot.","status":"active","externalSystemEndpoint":"https://leads.lablibre.com/api/assessment-intake"}]
+DEFAULT_AGENT_SLUG=advisor
 EXTERNAL_SYSTEM_API_TOKEN=your_external_system_token
 SEND_CONTACT_COPY=true
 ```
@@ -123,23 +125,25 @@ For the multi-agent version, this assessment app should stay stateless. It only 
 Agent links should use the first path segment as the agent slug:
 
 ```txt
-https://assess.lablibre.com/richard
-https://assess.lablibre.com/maria
-https://assess.lablibre.com/agent_name
+https://assess.example.com/advisor
+https://assess.example.com/team-member
+https://assess.example.com/agent_name
 ```
+
+To make the root URL use a configured profile, set `DEFAULT_AGENT_SLUG` to one of the active slugs in `AGENTS_JSON`. For example, `DEFAULT_AGENT_SLUG=advisor` makes `https://assess.example.com` load that advisor's public copy and route root submissions to that advisor's `agentEmail` and `externalSystemEndpoint`.
 
 Each manually configured agent should have:
 
 ```json
 {
-  "slug": "richard",
-  "agentName": "Richard Badlisan",
-  "agentEmail": "richard@example.com",
+  "slug": "advisor",
+  "agentName": "Advisor Name",
+  "agentEmail": "advisor@example.com",
   "toolName": "Financial Foundation Check",
   "headline": "Check your financial foundation in minutes",
   "subheadline": "Answer a few questions and get a personalized readiness snapshot.",
   "status": "active",
-  "externalSystemEndpoint": "https://external-system.example.com/api/assessment-intake"
+  "externalSystemEndpoint": "https://leads.lablibre.com/api/assessment-intake"
 }
 ```
 

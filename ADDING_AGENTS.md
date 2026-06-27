@@ -5,16 +5,24 @@ This guide is for adding a new agent or advisor to the assessment tool without c
 Each agent gets their own link:
 
 ```txt
-https://assess.lablibre.com/agent_name
+https://assess.example.com/agent_name
 ```
 
 Example:
 
 ```txt
-https://assess.lablibre.com/richard
+https://assess.example.com/advisor
 ```
 
 When someone submits the form from that link, the assessment email goes to that agent's email address. The same form data is also sent to the connected external system.
+
+The root link can also use one agent as the default:
+
+```txt
+https://assess.example.com
+```
+
+Ask the technical owner to set `DEFAULT_AGENT_SLUG` to your slug, such as `advisor`. Then the root link uses the same profile, email routing, and external API endpoint as that agent.
 
 ## What You Need
 
@@ -34,14 +42,14 @@ Each agent is written as one JSON object:
 
 ```json
 {
-  "slug": "richard",
-  "agentName": "Richard Badlisan",
-  "agentEmail": "richard@example.com",
+  "slug": "advisor",
+  "agentName": "Advisor Name",
+  "agentEmail": "advisor@example.com",
   "toolName": "Financial Foundation Check",
   "headline": "Check your financial foundation in minutes",
   "subheadline": "Answer a few quick questions and get a personalized snapshot of your savings, protection, and next best step.",
   "status": "active",
-  "externalSystemEndpoint": "https://your-external-system.com/api/assessment-intake"
+  "externalSystemEndpoint": "https://leads.lablibre.com/api/assessment-intake"
 }
 ```
 
@@ -49,10 +57,10 @@ Each agent is written as one JSON object:
 
 `slug`
 
-This is the public link name. If the slug is `richard`, the public link is:
+This is the public link name. If the slug is `advisor`, the public link is:
 
 ```txt
-https://assess.lablibre.com/richard
+https://assess.example.com/advisor
 ```
 
 Use lowercase letters, numbers, hyphens, or underscores only. Avoid spaces.
@@ -60,7 +68,7 @@ Use lowercase letters, numbers, hyphens, or underscores only. Avoid spaces.
 Good examples:
 
 ```txt
-richard
+advisor
 maria
 juan_santos
 agent-001
@@ -69,7 +77,7 @@ agent-001
 Avoid:
 
 ```txt
-Richard Badlisan
+Advisor Name
 maria@email.com
 agent/name
 ```
@@ -109,7 +117,7 @@ The API endpoint that receives the same assessment payload. If all agents use th
 In Cloudflare Pages, set the `AGENTS_JSON` environment variable to this:
 
 ```txt
-[{"slug":"richard","agentName":"Richard Badlisan","agentEmail":"richard@example.com","toolName":"Financial Foundation Check","headline":"Check your financial foundation in minutes","subheadline":"Answer a few quick questions and get a personalized snapshot of your savings, protection, and next best step.","status":"active","externalSystemEndpoint":"https://your-external-system.com/api/assessment-intake"}]
+[{"slug":"advisor","agentName":"Advisor Name","agentEmail":"advisor@example.com","toolName":"Financial Foundation Check","headline":"Check your financial foundation in minutes","subheadline":"Answer a few quick questions and get a personalized snapshot of your savings, protection, and next best step.","status":"active","externalSystemEndpoint":"https://leads.lablibre.com/api/assessment-intake"}]
 ```
 
 Then redeploy the Cloudflare Pages project.
@@ -117,7 +125,7 @@ Then redeploy the Cloudflare Pages project.
 The agent link will be:
 
 ```txt
-https://assess.lablibre.com/richard
+https://assess.example.com/advisor
 ```
 
 ## Add More Than One Agent
@@ -127,14 +135,14 @@ For multiple agents, place each agent object inside the same list.
 Example:
 
 ```txt
-[{"slug":"richard","agentName":"Richard Badlisan","agentEmail":"richard@example.com","toolName":"Financial Foundation Check","headline":"Check your financial foundation in minutes","subheadline":"Answer a few quick questions and get a personalized snapshot of your savings, protection, and next best step.","status":"active","externalSystemEndpoint":"https://your-external-system.com/api/assessment-intake"},{"slug":"maria","agentName":"Maria Santos","agentEmail":"maria@example.com","toolName":"Maria's Financial Foundation Check","headline":"Start with a simple financial readiness check","subheadline":"Answer a few questions so Maria can review your profile and next step.","status":"active","externalSystemEndpoint":"https://your-external-system.com/api/assessment-intake"}]
+[{"slug":"advisor","agentName":"Advisor Name","agentEmail":"advisor@example.com","toolName":"Financial Foundation Check","headline":"Check your financial foundation in minutes","subheadline":"Answer a few quick questions and get a personalized snapshot of your savings, protection, and next best step.","status":"active","externalSystemEndpoint":"https://leads.lablibre.com/api/assessment-intake"},{"slug":"team-member","agentName":"Team Member Name","agentEmail":"team-member@example.com","toolName":"Team Member's Financial Foundation Check","headline":"Start with a simple financial readiness check","subheadline":"Answer a few questions so your advisor can review your profile and next step.","status":"active","externalSystemEndpoint":"https://leads.lablibre.com/api/assessment-intake"}]
 ```
 
 This creates:
 
 ```txt
-https://assess.lablibre.com/richard
-https://assess.lablibre.com/maria
+https://assess.example.com/advisor
+https://assess.example.com/team-member
 ```
 
 ## How To Update `AGENTS_JSON` In Cloudflare
@@ -216,6 +224,6 @@ Copy this template when adding a new agent:
   "headline": "Check your financial foundation in minutes",
   "subheadline": "Answer a few quick questions and get a personalized snapshot of your savings, protection, and next best step.",
   "status": "active",
-  "externalSystemEndpoint": "https://your-external-system.com/api/assessment-intake"
+  "externalSystemEndpoint": "https://leads.lablibre.com/api/assessment-intake"
 }
 ```
