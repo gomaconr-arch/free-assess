@@ -35,6 +35,23 @@ const isEmailAddress = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEma
 
 const shouldRequireExternalForward = (env) => String(env.REQUIRE_EXTERNAL_FORWARD || '').toLowerCase() === 'true';
 
+class ForwardingError extends Error {
+  constructor(message, details = {}) {
+    super(message);
+    this.name = 'ForwardingError';
+    this.details = details;
+  }
+}
+
+const describeEndpoint = (endpoint) => {
+  try {
+    const url = new URL(endpoint);
+    return `${url.origin}${url.pathname}`;
+  } catch {
+    return 'invalid endpoint';
+  }
+};
+
 const OPTION_LABELS = {
   stage: {
     single_nodep: 'Single, no dependents',
@@ -365,7 +382,12 @@ const forwardAssessmentPayload = async ({ env, agent, payload }) => {
   }
 
   if (!response.ok) {
-    throw new Error(result?.error || result?.message || `External forwarding failed with status ${response.status}.`);
+    throw new ForwardingError(result?.error || result?.message || `External forwarding failed with status ${response.status}.`, {
+      endpoint: describeEndpoint(endpoint),
+      status: response.status,
+      statusText: response.statusText,
+      result
+    });
   }
 
   console.log(
@@ -471,12 +493,20 @@ export async function onRequestPost({ request, env }) {
     try {
       forwarding = await forwardAssessmentPayload({ env, agent, payload });
     } catch (error) {
-      console.error('External assessment forwarding failed:', error.message);
+      console.error(
+        'External assessment forwarding failed:',
+        JSON.stringify({
+          message: error.message,
+          details: error.details || null,
+          agentSlug: agent?.slug || null
+        })
+      );
 
       forwarding = {
         attempted: true,
         sent: false,
-        error: error.message
+        error: error.message,
+        details: error.details || null
       };
 
       if (shouldRequireExternalForward(env)) {
