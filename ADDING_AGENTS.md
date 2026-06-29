@@ -90,6 +90,8 @@ The agent's display name.
 
 The email address that receives the completed assessment submission.
 
+If the project uses Cloudflare Email Routing only, this address may need to be manually verified in Cloudflare before delivery works. For agents added only through `AGENTS_JSON`, the technical owner should use an outbound email provider such as Resend so new agent addresses do not need manual Cloudflare destination setup.
+
 `toolName`
 
 The tool name shown on the first screen.
