@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5.15 - 2026-06-29
+
+Prompt context:
+- Remove the email-delivery bottleneck where agent and contact emails had to be manually added as Cloudflare email destinations before delivery worked.
+
+Changes:
+- Added configurable outbound email delivery through `EMAIL_PROVIDER`, keeping Cloudflare as the default and adding `EMAIL_PROVIDER=resend` support.
+- Updated lead notification and optional contact-copy emails to use the selected provider without changing `AGENTS_JSON`.
+- Documented why Cloudflare Email Routing is not suitable for arbitrary agent/contact nurture emails and added the Resend environment variables.
+- Updated the agent setup guide to call out Cloudflare destination verification limits.
+- Bumped project version for the outbound email provider option.
+
 ## 1.5.14 - 2026-06-26
 
 Prompt context:

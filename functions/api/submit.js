@@ -35,6 +35,8 @@ const isEmailAddress = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEma
 
 const shouldRequireExternalForward = (env) => String(env.REQUIRE_EXTERNAL_FORWARD || '').toLowerCase() === 'true';
 
+const getEmailProvider = (env = {}) => String(env.EMAIL_PROVIDER || 'cloudflare').trim().toLowerCase();
+
 class ForwardingError extends Error {
   constructor(message, details = {}) {
     super(message);
@@ -348,6 +350,74 @@ const sendCloudflareEmail = async ({ env, to, from, replyTo, subject, text, html
   return postCloudflareEmail({ env, body });
 };
 
+const sendResendEmail = async ({ env, to, from, replyTo, subject, text, html }) => {
+  const body = {
+    from,
+    to,
+    subject,
+    text,
+    html
+  };
+
+  if (replyTo) {
+    body.reply_to = replyTo;
+  }
+
+  const emailResponse = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  let result = null;
+
+  try {
+    result = await emailResponse.json();
+  } catch {
+    result = { error: emailResponse.statusText };
+  }
+
+  return {
+    emailResponse,
+    result: {
+      success: emailResponse.ok && Boolean(result?.id),
+      result,
+      errors: emailResponse.ok ? [] : [{ message: result?.message || result?.error || 'Resend Email API failed.' }]
+    }
+  };
+};
+
+const sendEmail = (options) => {
+  const provider = getEmailProvider(options.env);
+
+  if (provider === 'resend') {
+    return sendResendEmail(options);
+  }
+
+  return sendCloudflareEmail(options);
+};
+
+const validateEmailProviderConfig = (env) => {
+  const provider = getEmailProvider(env);
+
+  if (provider === 'resend') {
+    return env.RESEND_API_KEY ? null : 'Missing RESEND_API_KEY environment variable.';
+  }
+
+  if (provider !== 'cloudflare') {
+    return `Unsupported EMAIL_PROVIDER "${provider}". Use "cloudflare" or "resend".`;
+  }
+
+  if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_EMAIL_API_TOKEN) {
+    return 'Missing Cloudflare Email REST API configuration.';
+  }
+
+  return null;
+};
+
 const forwardAssessmentPayload = async ({ env, agent, payload }) => {
   const endpoint = agent?.externalSystemEndpoint || env.EXTERNAL_SYSTEM_ENDPOINT;
 
@@ -404,8 +474,10 @@ const forwardAssessmentPayload = async ({ env, agent, payload }) => {
 
 export async function onRequestPost({ request, env }) {
   try {
-    if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_EMAIL_API_TOKEN) {
-      return jsonResponse({ error: 'Missing Cloudflare Email REST API configuration.' }, 500);
+    const emailProviderError = validateEmailProviderConfig(env);
+
+    if (emailProviderError) {
+      return jsonResponse({ error: emailProviderError }, 500);
     }
 
     if (!env.EMAIL_FROM) {
@@ -447,8 +519,9 @@ export async function onRequestPost({ request, env }) {
       return jsonResponse({ error: 'Agent email routing is not valid.' }, 500);
     }
 
+    const emailProvider = getEmailProvider(env);
     const subject = `New Financial Foundation Lead: ${quoteData.name}`;
-    const { emailResponse, result } = await sendCloudflareEmail({
+    const { emailResponse, result } = await sendEmail({
       env,
       to,
       from,
@@ -459,8 +532,8 @@ export async function onRequestPost({ request, env }) {
     });
 
     if (!emailResponse.ok || !result.success) {
-      console.error('Cloudflare Email REST API failed:', JSON.stringify(result));
-      const message = result.errors?.[0]?.message || 'Cloudflare Email REST API failed.';
+      console.error(`${emailProvider} email API failed:`, JSON.stringify(result));
+      const message = result.errors?.[0]?.message || `${emailProvider} email API failed.`;
       return jsonResponse({ error: message }, emailResponse.status || 500);
     }
 
@@ -468,7 +541,7 @@ export async function onRequestPost({ request, env }) {
 
     if (String(env.SEND_CONTACT_COPY || '').toLowerCase() === 'true') {
       const copySubject = 'Your Financial Foundation Score and Roadmap';
-      const copyResponse = await sendCloudflareEmail({
+      const copyResponse = await sendEmail({
         env,
         to: contactEmail,
         from,
@@ -478,7 +551,7 @@ export async function onRequestPost({ request, env }) {
       });
 
       if (!copyResponse.emailResponse.ok || !copyResponse.result.success) {
-        console.error('Cloudflare contact copy failed:', JSON.stringify(copyResponse.result));
+        console.error(`${emailProvider} contact copy failed:`, JSON.stringify(copyResponse.result));
         contactCopy = {
           sent: false,
           error: copyResponse.result.errors?.[0]?.message || 'Contact copy failed.'

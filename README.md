@@ -64,8 +64,10 @@ The Pages dashboard may not show a Send Email binding. That is expected. Use Clo
 
 In the same Pages project, go to Settings > Environment variables and add:
 
-- `CLOUDFLARE_ACCOUNT_ID`: your Cloudflare account ID
-- `CLOUDFLARE_EMAIL_API_TOKEN`: the API token with Email Sending permission
+- `EMAIL_PROVIDER`: optional, use `cloudflare` by default or `resend` for unrestricted outbound agent/contact emails
+- `CLOUDFLARE_ACCOUNT_ID`: your Cloudflare account ID, required when `EMAIL_PROVIDER` is unset or `cloudflare`
+- `CLOUDFLARE_EMAIL_API_TOKEN`: the API token with Email Sending permission, required when `EMAIL_PROVIDER` is unset or `cloudflare`
+- `RESEND_API_KEY`: required when `EMAIL_PROVIDER=resend`
 - `EMAIL_FROM`: verified sender address, such as `sender@example.com`
 - `AGENTS_JSON`: JSON array of manually configured agents for `/agent_name` links
 - `DEFAULT_AGENT_SLUG`: optional slug from `AGENTS_JSON` that should own root submissions from `https://assess.example.com`
@@ -76,11 +78,11 @@ In the same Pages project, go to Settings > Environment variables and add:
 - `REQUIRE_EXTERNAL_FORWARD`: optional, set to `true` to fail submission when forwarding fails
 - `SEND_CONTACT_COPY`: optional, set to `true` to email the submitted contact a copy of their score and roadmap summary
 
-For multi-agent links, the Function uses `agentEmail` from `AGENTS_JSON` instead of the fixed `EMAIL_TO` fallback. When `DEFAULT_AGENT_SLUG` is set, the root URL uses that same agent profile and routing. Keep `EMAIL_FROM` on a verified Cloudflare zone.
+For multi-agent links, the Function uses `agentEmail` from `AGENTS_JSON` instead of the fixed `EMAIL_TO` fallback. When `DEFAULT_AGENT_SLUG` is set, the root URL uses that same agent profile and routing. Keep `EMAIL_FROM` on a verified sender domain for the selected provider.
 
-By default, the Function sends the complete lead report to the resolved agent email. When `SEND_CONTACT_COPY=true`, the Function also sends a customer-facing copy to the email address entered in the form. The contact-copy send is best effort: if the owner notification succeeds but Cloudflare rejects the contact copy, the form still completes and the failure is logged in the Pages Function logs.
+By default, the Function sends the complete lead report to the resolved agent email. When `SEND_CONTACT_COPY=true`, the Function also sends a customer-facing copy to the email address entered in the form. The contact-copy send is best effort: if the owner notification succeeds but the selected provider rejects the contact copy, the form still completes and the failure is logged in the Pages Function logs.
 
-For contact copies, make sure Cloudflare Email Sending allows your verified `EMAIL_FROM` sender to send to external recipients. If your Cloudflare account or email setup restricts recipients, leave `SEND_CONTACT_COPY` unset and use the owner notification workflow instead.
+Cloudflare Email Routing is primarily an inbound forwarding product, and Cloudflare email setups can require manually verified destination addresses. If agent or contact emails should be sent to arbitrary external inboxes from `AGENTS_JSON` or form submissions, use `EMAIL_PROVIDER=resend` or another transactional email provider instead of relying on Cloudflare Email Routing destinations.
 
 Redeploy the Pages project after adding or changing environment variables.
 
@@ -97,6 +99,19 @@ await fetch(`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCO
 });
 ```
 
+When `EMAIL_PROVIDER=resend`, the Function calls Resend's HTTP API instead:
+
+```js
+await fetch('https://api.resend.com/emails', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${env.RESEND_API_KEY}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ to, from, subject, html, text, reply_to })
+});
+```
+
 For local Cloudflare Pages Function testing, copy `.dev.vars.example` to `.dev.vars` and replace the placeholder values:
 
 ```bash
@@ -108,6 +123,8 @@ The local `.dev.vars` file should not be committed.
 ```txt
 CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
 CLOUDFLARE_EMAIL_API_TOKEN=your_email_sending_api_token
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=your_resend_api_key
 EMAIL_FROM=sender@example.com
 EMAIL_TO=owner@example.com
 AGENTS_JSON=[{"slug":"advisor","agentName":"Advisor Name","agentEmail":"advisor@example.com","toolName":"Financial Foundation Check","headline":"Check your financial foundation in minutes","subheadline":"Answer a few questions and get a personalized readiness snapshot.","status":"active","externalSystemEndpoint":"https://leads.lablibre.com/api/assessment-intake"}]
